@@ -185,6 +185,7 @@
     <ClInclude Include="External Libraries\imgui\imstb_rectpack.h" />
     <ClInclude Include="External Libraries\imgui\imstb_textedit.h" />
     <ClInclude Include="External Libraries\imgui\imstb_truetype.h" />
+    <ClInclude Include="src\FPSCounter.h" />
     <ClInclude Include="src\Cloth.h" />
     <ClInclude Include="src\Constant.h" />
     <ClInclude Include="src\Floor.h" />
@@ -197,6 +198,7 @@
     <ClInclude Include="src\Renderer\Mesh.h" />
     <ClInclude Include="src\Renderer\MeshUtility.h" />
     <ClInclude Include="src\Renderer\Shader.h" />
+    <ClInclude Include="src\Renderer\SkyBox.h" />
     <ClInclude Include="src\Renderer\Texture.h" />
     <ClInclude Include="src\Renderer\VAO.h" />
     <ClInclude Include="src\Renderer\VBO.h" />
@@ -206,6 +208,8 @@
   <ItemGroup>
     <None Include="Shader\objectFragment.shader" />
     <None Include="Shader\objectVertex.shader" />
+    <None Include="Shader\SkyBoxFragment.shader" />
+    <None Include="Shader\SkyBoxVertex.shader" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Texture\awesomeface.png" />

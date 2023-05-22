@@ -98,6 +98,8 @@
     <None Include="Shader\objectVertex.shader">
       <Filter>Resource Files\Shaders</Filter>
     </None>
+    <None Include="Shader\SkyBoxVertex.shader" />
+    <None Include="Shader\SkyBoxFragment.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="External Libraries\stb\stb_image.h">
@@ -173,6 +175,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Renderer\MeshUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FPSCounter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Renderer\SkyBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

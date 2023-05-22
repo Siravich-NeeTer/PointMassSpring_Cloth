@@ -14,7 +14,7 @@ out vec2 TextureCoord;
 
 void main()
 {
-	Normal = aNormal;
+	Normal = normalize(aNormal);
 	gl_Position = u_Projection * u_View * u_Model * vec4(aPos, 1.0f);
 	FragPos = vec3(u_Model * vec4(aPos, 1.0f));
 	TextureCoord = aTexCoord.xy;

@@ -1,10 +1,12 @@
 #version 330 core
 
+#define N_LIGHTS 3
+
 out vec4 FragColor;
 
 uniform vec3 u_Color;
-uniform vec3 u_LightPos;
-uniform vec3 u_Halfway;
+uniform vec3 u_LightPos[N_LIGHTS];
+uniform vec3 u_CameraPos;
 
 uniform bool u_DoLight;
 uniform bool u_IsTexture;
@@ -18,10 +20,24 @@ float ka = 0.15f;
 float kd = 1.0f;
 vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);
 vec3 lightDir;
+vec3 halfWay;
 
 in vec3 Normal;
 in vec3 FragPos;
 in vec2 TextureCoord;
+
+vec3 CalcPointLight(vec3 lightPos)
+{
+	lightDir = normalize(lightPos - FragPos);
+	halfWay = normalize(lightPos - u_CameraPos);
+
+	float r = length(lightPos - FragPos);
+	vec3 ambient = ka * lightColor;
+	vec3 diffuse = max(0.0f, dot(Normal, lightDir)) * lightColor;
+	vec3 specular = ks * (I / (r * r)) * pow(max(0.0f, dot(Normal, halfWay)), p) * lightColor;
+
+	return (ambient + diffuse + specular);
+}
 
 void main()
 {
@@ -29,24 +45,11 @@ void main()
 
 	if (u_DoLight)
 	{
-		lightDir = normalize(u_LightPos - FragPos);
-
-		vec3 norm = normalize(Normal);
-		vec3 halfWay = normalize(u_Halfway);
-		
-		float r = length(u_LightPos - FragPos);
-		vec3 ambient = ka * lightColor;
-		vec3 diffuse = max(0.0f, dot(norm, lightDir)) * lightColor;
-		vec3 specular = ks * (I / (r * r)) * pow(max(0.0f, dot(norm, halfWay)), p) * lightColor;
-		
-		/*
-		float ambient = ka;
-		float diffuse = kd * (I / (r * r)) * max(0.0f, dot(normalVertex, u_LightVector));
-		float specular = ks * (I / (r * r)) * pow(max(0.0f, dot(normalVertex, u_Halfway)), p);
-		finalColor = normalVertex;
-		*/
-
-		finalColor = (ambient + diffuse + specular) * u_Color;
+		finalColor = vec3(0.0f);
+		for (int i = 0; i < N_LIGHTS; i++)
+		{
+			finalColor += CalcPointLight(u_LightPos[i]) * u_Color;
+		}
 	}
 
 	if (u_IsTexture)

@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <array>
 #include <map>
 
 #include <glm/glm.hpp>
@@ -27,7 +28,7 @@ class Cloth : public Object
 {
 	private:
 		std::vector<glm::vec3> vertices = { glm::vec3(0,0,0), glm::vec3(1,1,1) };
-		std::vector<PointMass*> m_PointMass;
+		PointMass** m_PointMass;
 		mutable glm::bvec3 m_WindForceFlag = glm::bvec3(false);
 		mutable glm::vec3 m_WindForceCoeff = glm::vec3(0.5f);
 		mutable bool m_PinPoint[4] = { false, false, false, false };

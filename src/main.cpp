@@ -3,6 +3,7 @@
 
 #include "Window.h"
 #include "Renderer/Shader.h"
+#include "Renderer/SkyBox.h"
 #include "Camera.h"
 
 #include "Cloth.h"
@@ -10,6 +11,8 @@
 #include "Sphere.h"
 #include "Floor.h"
 #include "Constant.h"
+
+#include "FPSCounter.h"
 
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
@@ -27,12 +30,16 @@ bool renderType = false;
 
 bool isRenderSphere = true;
 
+FPSCounter fpsCounter;
+
 void UpdateUIMenu(Cloth& cloth, Sphere& sphere, Floor& floor);
 
 int main()
 {
 	Window window(SCREEN_WIDTH, SCREEN_HEIGHT, "Cloth_Simulation");
 	window.Init();
+
+	SkyBox skybox;
 
 	Cloth cloth(m, samplerAmount, length);
 	Sphere sphere({ length / 2.0f, -1.0f, length / 2.0f });
@@ -52,7 +59,16 @@ int main()
 	}
 
 	Camera cam(glm::vec3(0,0,8));
-	Shader shader("Shader/objectVertex.shader", "Shader/objectFragment.shader");
+	Shader normalShader("Shader/objectVertex.shader", "Shader/objectFragment.shader");
+	Shader skyboxShader("Shader/SkyBoxVertex.shader", "Shader/SkyBoxFragment.shader");
+	skybox.SetTexture({
+		"Texture/right.jpg",
+		"Texture/left.jpg",
+		"Texture/top.jpg",
+		"Texture/bottom.jpg",
+		"Texture/front.jpg",
+		"Texture/back.jpg"
+		});
 
 	// --------------- Game Loop ---------------
 	float prevTime = 0.0f;
@@ -61,7 +77,10 @@ int main()
 	{
 		float currentTime = glfwGetTime();
 		dt = currentTime - prevTime;
+		//dt = TimeStep;
 		window.PollEvents();
+
+		fpsCounter.Update(dt);
 
 		// Start the Dear ImGui frame
 		ImGui_ImplOpenGL3_NewFrame();
@@ -101,26 +120,31 @@ int main()
 
 		UpdateUIMenu(cloth, sphere, floor);
 
-		// Run Application
-		shader.Activate();
+		glm::mat4 view = cam.GetViewMatrix();
+		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 
-		glm::mat4 view = glm::mat4(1.0f);
-		glm::mat4 projection = glm::mat4(1.0f);
-		projection = glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
-		view = cam.GetViewMatrix();
+		// Draw Normal Object
+		normalShader.Activate();
 
-		shader.SetMat4("u_Projection", projection);
-		shader.SetMat4("u_View", view);
-		shader.SetBool("u_DoLight", false);
+		normalShader.SetMat4("u_View", view);
+		normalShader.SetMat4("u_Projection", projection);
+		normalShader.SetBool("u_DoLight", false);
 
 		if(startSimulate) cloth.UpdateForce(dt, sphere, floor);
 
-		floor.Draw(shader);
-		sphere.Draw(shader);
+		floor.Draw(normalShader);
+		sphere.Draw(normalShader);
 		if(renderType)
-			cloth.DrawWireframe(shader);
+			cloth.DrawWireframe(normalShader);
 		else
-			cloth.DrawTexture(cam, shader);
+			cloth.DrawTexture(cam, normalShader);
+
+		// Draw SkyBox
+		skyboxShader.Activate();
+		skyboxShader.SetMat4("u_View", glm::mat4(glm::mat3(view)));
+		skyboxShader.SetMat4("u_Projection", projection);
+
+		skybox.Draw(skyboxShader);
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -193,6 +217,8 @@ void UpdateUIMenu(Cloth& cloth, Sphere& sphere, Floor& floor)
 		ImGui::DragFloat3("Position(Floor)", &floor.GetPosition()[0], 0.01f);
 		ImGui::ColorEdit3("Color(Floor)", &floor.GetColor()[0]);
 	}
+
+	ImGui::Text(("FPS : " + fpsCounter.GetFPS()).c_str());
 
 	if (ImGui::Button("Start"))
 	{

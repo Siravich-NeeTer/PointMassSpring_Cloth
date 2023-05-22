@@ -8,7 +8,7 @@ Cloth::Cloth(const float& mass, const int& samplerAmount, const float& clothSize
 	m_EachMassInvert = 1.0f / m_EachMass;
 	m_EachLength = m_ClothSize / (m_SamplerAmount - 1);
 
-	m_PointMass.resize(samplerAmount * samplerAmount);
+	m_PointMass = new PointMass* [samplerAmount * samplerAmount];
 	for (int row = 0; row < samplerAmount; row++)
 	{
 		for (int col = 0; col < samplerAmount; col++)
@@ -31,6 +31,8 @@ Cloth::~Cloth()
 	{
 		delete m_PointMass[index];
 	}
+
+	delete m_PointMass;
 }
 
 void Cloth::Reset()
@@ -124,7 +126,11 @@ void Cloth::DrawWireframe(const Shader& shader)
 }
 void Cloth::DrawTexture(const Camera& camera, const Shader& shader)
 {
-	glm::vec3 lightPos = glm::vec3(length / 2.0f, 3.0f, length / 2.0f);
+	glm::vec3 lightPos[5] = { 
+		glm::vec3(length / 2.0f, 3.0f, length / 2.0f),
+		glm::vec3(0.0f, 0.0f, length / 2.0f),
+		glm::vec3(length, 0.0f, length / 2.0f),
+	};
 	
 	m_ClothTexture.Activate(GL_TEXTURE0);
 
@@ -134,8 +140,12 @@ void Cloth::DrawTexture(const Camera& camera, const Shader& shader)
 	shader.SetBool("u_IsTexture", true);
 	shader.SetInt("u_Texture", 0);
 	shader.SetMat4("u_Model", glm::mat4(1.0f));
-	shader.SetVec3("u_LightPos", lightPos);
-	shader.SetVec3("u_Halfway", 0.5f * (lightPos - camera.GetPosition()));
+	shader.SetVec3("u_LightPos[0]", lightPos[0]);
+	shader.SetVec3("u_LightPos[1]", lightPos[1]);
+	shader.SetVec3("u_LightPos[2]", lightPos[2]);
+	shader.SetVec3("u_LightPos[3]", lightPos[3]);
+	shader.SetVec3("u_LightPos[4]", lightPos[4]);
+	shader.SetVec3("u_CameraPos", camera.GetPosition());
 
 	// Compute Normal
 	for (int row = 0; row < m_SamplerAmount - 1; row++)
@@ -236,7 +246,7 @@ void Cloth::DrawTexture(const Camera& camera, const Shader& shader)
 void Cloth::UpdateForce(const float& dt, const Sphere& sphere, const Floor& floor)
 {
 	float k = sqrt(kx * kx + ky * ky);
-	m_Time += TimeStep;
+	m_Time += dt;
 
 	for (int row = 0; row < m_SamplerAmount; row++)
 	{
@@ -312,7 +322,7 @@ void Cloth::UpdateForce(const float& dt, const Sphere& sphere, const Floor& floo
 		for (int col = 0; col < m_SamplerAmount; col++)
 		{
 			PointMass* currentPointMass = GetPointMass(row, col);
-			currentPointMass->UpdatePosition(TimeStep);
+			currentPointMass->UpdatePosition(dt);
 
 			if (sphere.IsActive())
 			{
