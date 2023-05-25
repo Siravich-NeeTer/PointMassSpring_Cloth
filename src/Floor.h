@@ -3,6 +3,7 @@
 #include "Renderer/Mesh.h"
 #include "Renderer/MeshUtility.h"
 #include "Renderer/Shader.h"
+#include "Renderer/Texture.h"
 
 #include "Object.h"
 
@@ -21,6 +22,7 @@ class Floor : public Object
 			std::vector<GLuint> indices;
 
 		} m_FloorMesh;
+		Texture m_FloorTexture;
 
 	public:
 		glm::vec3 scale;

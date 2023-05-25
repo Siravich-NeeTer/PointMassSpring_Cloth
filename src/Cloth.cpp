@@ -261,7 +261,7 @@ void Cloth::UpdateForce(const float& dt, const Sphere& sphere, const Floor& floo
 			std::vector<PointMass*> flexionYAxisNeighborPointMass = GetFlexionYAxisNeighborPointMass(row, col);
 
 			// Apply Gravitational Force
-			currentPointMass->force += m_EachMass * glm::vec3(0.0f, 0.1f * -g, 0.0f);
+			currentPointMass->force += m_EachMass * glm::vec3(0.0f, -g, 0.0f);
 
 			// Apply Spring Force
 			for (int i = 0; i < structuralXAxisNeighborPointMass.size(); i++)
@@ -304,7 +304,11 @@ void Cloth::UpdateForce(const float& dt, const Sphere& sphere, const Floor& floo
 			// Apply Dampling Force
 			currentPointMass->force += -0.005f * currentPointMass->velocity;
 
-			currentPointMass->acceleration = m_EachMassInvert * currentPointMass->force;
+			// F = ma
+			// a = F / m
+			currentPointMass->acceleration = m_EachMassInvert * currentPointMass->force * dt;
+			//std::cout << currentPointMass->acceleration.x << " " << currentPointMass->acceleration.y << " " << currentPointMass->acceleration.z << "\n";
+
 			currentPointMass->force = glm::vec3(0.0f);
 
 			// Set normal Vector to (0,0,0) -> will be compute when drawing

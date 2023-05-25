@@ -11,3 +11,5 @@
 #include <vector>
 
 void GenerateCubeBuffer(const VAO& vertexArray, const VBO& vertexBuffer, const EBO& elementBuffer, std::vector<GLuint>* indices = nullptr);
+
+void GenerateCubeBufferWithTexture(const VAO& vertexArray, const VBO& vertexBuffer, const EBO& elementBuffer, std::vector<GLuint>* indices = nullptr);

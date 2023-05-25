@@ -76,8 +76,8 @@ int main()
 	while (!window.ShouldClose())
 	{
 		float currentTime = glfwGetTime();
-		dt = currentTime - prevTime;
-		//dt = TimeStep;
+		//dt = currentTime - prevTime;
+		dt = TimeStep;
 		window.PollEvents();
 
 		fpsCounter.Update(dt);
@@ -101,7 +101,7 @@ int main()
 
 		if(isCameraMove)
 			cam.ProcessMousesMovement();
-		cam.Input(dt);
+		cam.Input(currentTime - prevTime);
 
 		if (Input::isKeyBeginPressed(GLFW_KEY_SPACE))
 			startSimulate = true;

@@ -2,19 +2,22 @@
 
 Floor::Floor()
 {
-	m_Color = glm::vec3(0.6f);
+	m_FloorTexture.SetTexture("Texture/container.jpg");
 
-	GenerateCubeBuffer(m_FloorMesh.vao, m_FloorMesh.vbo, m_FloorMesh.ebo, &m_FloorMesh.indices);
+	GenerateCubeBufferWithTexture(m_FloorMesh.vao, m_FloorMesh.vbo, m_FloorMesh.ebo, &m_FloorMesh.indices);
 }
 
 void Floor::Draw(const Shader& shader)
 {
 	if (!m_IsActive) { return; }
 
+	m_FloorTexture.Activate(GL_TEXTURE0);
+
 	shader.Activate();
 	shader.SetVec3("u_Color", m_Color);
-	shader.SetBool("u_IsTexture", false);
+	shader.SetBool("u_IsTexture", true);
 	shader.SetBool("u_DoLight", false);
+	shader.SetInt("u_Texture", 0);
 
 	glm::mat4 model = glm::translate(glm::mat4(1.0f), m_Position);
 	model = glm::scale(model, scale);
