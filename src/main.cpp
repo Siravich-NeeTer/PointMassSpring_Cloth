@@ -121,7 +121,7 @@ int main()
 		UpdateUIMenu(cloth, sphere, floor);
 
 		glm::mat4 view = cam.GetViewMatrix();
-		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(45.0f), window.GetWidth() / window.GetHeight(), 0.1f, 100.0f);
 
 		// Draw Normal Object
 		normalShader.Activate();

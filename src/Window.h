@@ -33,6 +33,8 @@ class Window
 
 		// Getter
 		GLFWwindow* GetWindow();
+		float GetWidth() const;
+		float GetHeight() const;
 
 		// Core-Loop
 		void Init();

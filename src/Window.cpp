@@ -47,6 +47,8 @@ void Window::SetTitle(const char* title) { this->m_Title = title; }
 
 // Getter Implement
 GLFWwindow* Window::GetWindow() { return m_Window; }
+float Window::GetWidth() const { return m_Width; }
+float Window::GetHeight() const { return m_Height; }
 
 void Window::Init()
 {
