@@ -69,7 +69,7 @@ int main()
 		"Texture/front.jpg",
 		"Texture/back.jpg"
 		});
-
+	
 	// --------------- Game Loop ---------------
 	float prevTime = 0.0f;
 	float dt = 0.0f;
@@ -80,7 +80,7 @@ int main()
 		dt = TimeStep;
 		window.PollEvents();
 
-		fpsCounter.Update(dt);
+		fpsCounter.Update(currentTime - prevTime);
 
 		// Start the Dear ImGui frame
 		ImGui_ImplOpenGL3_NewFrame();
@@ -91,13 +91,13 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		if (Input::isKeyPressed(GLFW_KEY_Z))
-			sphere.DecreaseZ(TimeStep);
+			sphere.DecreaseZ(dt);
 		if (Input::isKeyPressed(GLFW_KEY_X))
-			sphere.IncreaseZ(TimeStep);
+			sphere.IncreaseZ(dt);
 		if (Input::isKeyPressed(GLFW_KEY_C))
-			sphere.DecreaseY(TimeStep);
+			sphere.DecreaseY(dt);
 		if (Input::isKeyPressed(GLFW_KEY_V))
-			sphere.IncreaseY(TimeStep);
+			sphere.IncreaseY(dt);
 
 		if(isCameraMove)
 			cam.ProcessMousesMovement();
@@ -130,7 +130,8 @@ int main()
 		normalShader.SetMat4("u_Projection", projection);
 		normalShader.SetBool("u_DoLight", false);
 
-		if(startSimulate) cloth.UpdateForce(dt, sphere, floor);
+		if(startSimulate) 
+			cloth.UpdateForce(dt, sphere, floor);
 
 		floor.Draw(normalShader);
 		sphere.Draw(normalShader);

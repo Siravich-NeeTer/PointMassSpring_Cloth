@@ -55,6 +55,7 @@ void main()
 	if (u_IsTexture)
 	{
 		FragColor = vec4(finalColor, 1.0f) * texture(u_Texture, TextureCoord);
+		//FragColor = vec4(abs(Normal), 1.0f);
 	}
 	else
 	{
