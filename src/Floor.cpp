@@ -14,10 +14,12 @@ void Floor::Draw(const Shader& shader)
 	m_FloorTexture.Activate(GL_TEXTURE0);
 
 	shader.Activate();
+	/*
 	shader.SetVec3("u_Color", m_Color);
 	shader.SetBool("u_IsTexture", true);
 	shader.SetBool("u_DoLight", false);
-	shader.SetInt("u_Texture", 0);
+	*/
+	shader.SetInt("u_Texture_Diffuse", 0);
 
 	glm::mat4 model = glm::translate(glm::mat4(1.0f), m_Position);
 	model = glm::scale(model, scale);

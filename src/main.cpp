@@ -32,7 +32,37 @@ bool isRenderSphere = true;
 
 FPSCounter fpsCounter;
 
-void UpdateUIMenu(Cloth& cloth, Sphere& sphere, Floor& floor);
+void UpdateUIMenu(Cloth& cloth, Sphere& sphere, Floor& floor);\
+// renderQuad() renders a 1x1 XY quad in NDC
+// -----------------------------------------
+unsigned int quadVAO = 0;
+unsigned int quadVBO;
+void renderQuad()
+{
+	if (quadVAO == 0)
+	{
+		float quadVertices[] = {
+			// positions        // texture Coords
+			-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+			 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+			 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		};
+		// setup plane VAO
+		glGenVertexArrays(1, &quadVAO);
+		glGenBuffers(1, &quadVBO);
+		glBindVertexArray(quadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	}
+	glBindVertexArray(quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+}
 
 int main()
 {
@@ -50,7 +80,7 @@ int main()
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
 	ImGui_ImplGlfw_InitForOpenGL(window.GetWindow(), true);
-	ImGui_ImplOpenGL3_Init("#version 330");
+	ImGui_ImplOpenGL3_Init("#version 460");
 
 	if (window.IsNull())
 	{
@@ -69,7 +99,69 @@ int main()
 		"Texture/front.jpg",
 		"Texture/back.jpg"
 		});
+	Shader geometryPassShader("Shader/gBufferVertex.shader", "Shader/gBufferFragment.shader");
+	Shader deferredShader("Shader/deferredVertex.shader", "Shader/deferredFragment.shader");
+
+	// -------------- Initialize G-Buffer Frambuffer --------------
+	unsigned int gBuffer;
+	glGenFramebuffers(1, &gBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+	unsigned int gPosition, gNormal, gAlbedoSpec;
+	// Position Color Buffer
+	glGenTextures(1, &gPosition);
+	glBindTexture(GL_TEXTURE_2D, gPosition);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGBA, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
+	// Normal Color Buffer
+	glGenTextures(1, &gNormal);
+	glBindTexture(GL_TEXTURE_2D, gNormal);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGBA, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
+	// Color + Specular Color Buffer
+	glGenTextures(1, &gAlbedoSpec);
+	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
+	// Tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
+	unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+	glDrawBuffers(3, attachments);
+	// Create and Attach depth buffer (renderbuffer)
+	unsigned int rboDepth;
+	glGenRenderbuffers(1, &rboDepth);
+	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCREEN_WIDTH, SCREEN_HEIGHT);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+	// Finally check if framebuffer is complete
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cerr << "[ERROR] Framebuffer not complete!\n";
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	
+	// --------------- Light Configuration ----------------
+	glm::vec3 lightPos[3] = 
+	{
+		glm::vec3(length / 2.0f, 3.0f, length / 2.0f),
+		glm::vec3(0.0f, 0.0f, length / 2.0f),
+		glm::vec3(length, 0.0f, length / 2.0f),
+	};
+	glm::vec3 lightColor[3] =
+	{
+		glm::vec3(1.0f),
+		glm::vec3(1.0f),
+		glm::vec3(1.0f),
+	};
+
+	// --------------- Shader Configuration ---------------
+	deferredShader.Activate();
+	deferredShader.SetInt("gPosition", 0);
+	deferredShader.SetInt("gNormal", 1);
+	deferredShader.SetInt("gAlbedoSpec", 2);
+
 	// --------------- Game Loop ---------------
 	float prevTime = 0.0f;
 	float dt = 0.0f;
@@ -123,24 +215,78 @@ int main()
 		glm::mat4 view = cam.GetViewMatrix();
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), window.GetWidth() / window.GetHeight(), 0.1f, 100.0f);
 
+		// ------------------ Update Process ------------------
+		if(startSimulate) 
+			cloth.UpdateForce(dt, sphere, floor);
+		
+		// ------------------ Render gBuffer ------------------
+		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		geometryPassShader.Activate();
+		geometryPassShader.SetMat4("u_Projection", projection);
+		geometryPassShader.SetMat4("u_View", view);
+
+		//sphere.Draw(geometryPassShader);
+		floor.Draw(geometryPassShader);
+		cloth.DrawTexture(cam, geometryPassShader);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		// ------------------ Render Lighting ------------------
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		deferredShader.Activate();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, gPosition);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, gNormal);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+		// send light relevant uniforms
+		for (unsigned int i = 0; i < 3; i++)
+		{
+			deferredShader.SetVec3("lights[" + std::to_string(i) + "].Position", lightPos[i]);
+			deferredShader.SetVec3("lights[" + std::to_string(i) + "].Color", lightColor[i]);
+			// update attenuation parameters and calculate radius
+			const float constant = 1.0f; // note that we don't send this to the shader, we assume it is always 1.0 (in our case)
+			const float linear = 0.7f;
+			const float quadratic = 1.8f;
+			deferredShader.SetFloat("lights[" + std::to_string(i) + "].Linear", linear);
+			deferredShader.SetFloat("lights[" + std::to_string(i) + "].Quadratic", quadratic);
+			// then calculate radius of light volume/sphere
+			const float maxBrightness = std::fmaxf(std::fmaxf(lightColor[i].r, lightColor[i].g), lightColor[i].b);
+			float radius = (-linear + std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness))) / (2.0f * quadratic);
+			deferredShader.SetFloat("lights[" + std::to_string(i) + "].Radius", radius);
+		}
+		deferredShader.SetVec3("viewPos", cam.GetPosition());
+		// finally render quad
+		renderQuad();
+
+		// 2.5. copy content of geometry's depth buffer to default framebuffer's depth buffer
+		// ----------------------------------------------------------------------------------
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+		// blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
+		// the internal formats are implementation defined. This works on all of my systems, but if it doesn't on yours you'll likely have to write to the 		
+		// depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
+		glBlitFramebuffer(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
 		// Draw Normal Object
+		/*
 		normalShader.Activate();
 
 		normalShader.SetMat4("u_View", view);
 		normalShader.SetMat4("u_Projection", projection);
 		normalShader.SetBool("u_DoLight", false);
 
-		if(startSimulate) 
-			cloth.UpdateForce(dt, sphere, floor);
 
-		floor.Draw(normalShader);
-		sphere.Draw(normalShader);
 		if(renderType)
 			cloth.DrawWireframe(normalShader);
 		else
 			cloth.DrawTexture(cam, normalShader);
+		*/
 
-		// Draw SkyBox
+		// - Draw SkyBox
 		skyboxShader.Activate();
 		skyboxShader.SetMat4("u_View", glm::mat4(glm::mat3(view)));
 		skyboxShader.SetMat4("u_Projection", projection);

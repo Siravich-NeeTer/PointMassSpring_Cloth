@@ -174,6 +174,7 @@ void Cloth::DrawTexture(const Camera& camera, const Shader& shader)
 		glm::vec3(length, 0.0f, length / 2.0f),
 	};
 	
+	/*
 	m_ClothTexture.Activate(GL_TEXTURE0);
 
 	shader.Activate();
@@ -188,6 +189,7 @@ void Cloth::DrawTexture(const Camera& camera, const Shader& shader)
 	shader.SetVec3("u_LightPos[3]", lightPos[3]);
 	shader.SetVec3("u_LightPos[4]", lightPos[4]);
 	shader.SetVec3("u_CameraPos", camera.GetPosition());
+	*/
 
 	// Compute Normal
 	for (int row = 0; row < m_SamplerAmount - 1; row++)

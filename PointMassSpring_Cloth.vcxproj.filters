@@ -98,8 +98,24 @@
     <None Include="Shader\objectVertex.shader">
       <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="Shader\SkyBoxVertex.shader" />
-    <None Include="Shader\SkyBoxFragment.shader" />
+    <None Include="Shader\gBufferVertex.shader">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="Shader\SkyBoxFragment.shader">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="Shader\SkyBoxVertex.shader">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="Shader\gBufferFragment.shader">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="Shader\deferredFragment.shader">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="Shader\deferredVertex.shader">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="External Libraries\stb\stb_image.h">

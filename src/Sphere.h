@@ -88,10 +88,11 @@ class Sphere : public Object
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, m_Position);
             model = glm::scale(model, glm::vec3(m_Radius, m_Radius, m_Radius));
-
-            shader.SetBool("u_IsTexture", false);
             shader.SetMat4("u_Model", model);
+            /*
+            shader.SetBool("u_IsTexture", false);
             shader.SetVec3("u_Color", m_Color);
+            */
 
             m_SphereMesh.vao.Bind();
             glDrawElements(GL_TRIANGLES, m_SphereMesh.indices.size(), GL_UNSIGNED_INT, m_SphereMesh.indices.data());

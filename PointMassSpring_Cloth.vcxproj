@@ -206,6 +206,10 @@
     <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shader\deferredFragment.shader" />
+    <None Include="Shader\deferredVertex.shader" />
+    <None Include="Shader\gBufferFragment.shader" />
+    <None Include="Shader\gBufferVertex.shader" />
     <None Include="Shader\objectFragment.shader" />
     <None Include="Shader\objectVertex.shader" />
     <None Include="Shader\SkyBoxFragment.shader" />
