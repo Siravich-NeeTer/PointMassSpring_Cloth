@@ -63,6 +63,78 @@ void renderQuad()
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
 }
+unsigned int cubeVAO = 0;
+unsigned int cubeVBO = 0;
+void renderCube()
+{
+	// initialize (if necessary)
+	if (cubeVAO == 0)
+	{
+		float vertices[] = {
+			// back face
+			-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+			 1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+			 1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right         
+			 1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+			-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+			-1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
+			// front face
+			-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+			 1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right
+			 1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+			 1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+			-1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left
+			-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+			// left face
+			-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+			-1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
+			-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+			-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+			-1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+			-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+			// right face
+			 1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+			 1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+			 1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right         
+			 1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+			 1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+			 1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left     
+			 // bottom face
+			 -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+			  1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
+			  1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+			  1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+			 -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+			 -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+			 // top face
+			 -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+			  1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+			  1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right     
+			  1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+			 -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+			 -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left        
+		};
+		glGenVertexArrays(1, &cubeVAO);
+		glGenBuffers(1, &cubeVBO);
+		// fill buffer
+		glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		// link vertex attributes
+		glBindVertexArray(cubeVAO);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
+	// render Cube
+	glBindVertexArray(cubeVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+}
 
 int main()
 {
@@ -101,6 +173,7 @@ int main()
 		});
 	Shader geometryPassShader("Shader/gBufferVertex.shader", "Shader/gBufferFragment.shader");
 	Shader deferredShader("Shader/deferredVertex.shader", "Shader/deferredFragment.shader");
+	Shader shaderLightBox("Shader/lightBoxVertex.shader", "Shader/lightBoxFragment.shader");
 
 	// -------------- Initialize G-Buffer Frambuffer --------------
 	unsigned int gBuffer;
@@ -143,17 +216,21 @@ int main()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	
 	// --------------- Light Configuration ----------------
-	glm::vec3 lightPos[3] = 
+	glm::vec3 lightPos[5] = 
 	{
 		glm::vec3(length / 2.0f, 3.0f, length / 2.0f),
 		glm::vec3(0.0f, 0.0f, length / 2.0f),
 		glm::vec3(length, 0.0f, length / 2.0f),
+		glm::vec3(length / 2.0f, 0.0f, length),
+		glm::vec3(length / 2.0f, 0.0f, 0.0f)
 	};
-	glm::vec3 lightColor[3] =
+	glm::vec3 lightColor[5] =
 	{
 		glm::vec3(1.0f),
 		glm::vec3(1.0f),
 		glm::vec3(1.0f),
+		glm::vec3(1.0f),
+		glm::vec3(1.0f)
 	};
 
 	// --------------- Shader Configuration ---------------
@@ -241,14 +318,14 @@ int main()
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
 		// send light relevant uniforms
-		for (unsigned int i = 0; i < 3; i++)
+		for (unsigned int i = 0; i < 5; i++)
 		{
 			deferredShader.SetVec3("lights[" + std::to_string(i) + "].Position", lightPos[i]);
 			deferredShader.SetVec3("lights[" + std::to_string(i) + "].Color", lightColor[i]);
 			// update attenuation parameters and calculate radius
 			const float constant = 1.0f; // note that we don't send this to the shader, we assume it is always 1.0 (in our case)
-			const float linear = 0.7f;
-			const float quadratic = 1.8f;
+			const float linear = 0.09f;
+			const float quadratic = 0.032f;
 			deferredShader.SetFloat("lights[" + std::to_string(i) + "].Linear", linear);
 			deferredShader.SetFloat("lights[" + std::to_string(i) + "].Quadratic", quadratic);
 			// then calculate radius of light volume/sphere
@@ -269,6 +346,21 @@ int main()
 		// depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
 		glBlitFramebuffer(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		
+		// 3. render lights on top of scene
+		// --------------------------------
+		shaderLightBox.Activate();
+		shaderLightBox.SetMat4("projection", projection);
+		shaderLightBox.SetMat4("view", view);
+		for (unsigned int i = 0; i < 5; i++)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, lightPos[i]);
+			model = glm::scale(model, glm::vec3(0.125f));
+			shaderLightBox.SetMat4("model", model);
+			shaderLightBox.SetVec3("lightColor", lightColor[i]);
+			renderCube();
+		}
 
 
 		// Draw Normal Object

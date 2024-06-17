@@ -76,10 +76,21 @@ void Window::Init()
 		exit(EXIT_FAILURE);
 	}
 
+	/*  Hidden surface removal */
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+
+	/*  Enable writing to depth buffer */
+	glDepthMask(GL_TRUE);
+	
 	glDisable(GL_CULL_FACE);
-	glEnable(GL_BLEND);
+	
+	// Comment off since it make deferred shading gone wrong
+	// https://stackoverflow.com/questions/67548623/deferred-rendering-not-displaying-the-gbuffer-textures
+	//glEnable(GL_BLEND);		
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+
 
 	glViewport(0, 0, m_Width, m_Height);
 }

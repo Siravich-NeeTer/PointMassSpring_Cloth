@@ -206,6 +206,8 @@
     <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shader\lightBoxFragment.shader" />
+    <None Include="Shader\lightBoxVertex.shader" />
     <None Include="Shader\deferredFragment.shader" />
     <None Include="Shader\deferredVertex.shader" />
     <None Include="Shader\gBufferFragment.shader" />

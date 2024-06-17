@@ -4,7 +4,7 @@ Floor::Floor()
 {
 	m_FloorTexture.SetTexture("Texture/container.jpg");
 
-	GenerateCubeBufferWithTexture(m_FloorMesh.vao, m_FloorMesh.vbo, m_FloorMesh.ebo, &m_FloorMesh.indices);
+	GenerateCubeBufferWithTextureNormal(m_FloorMesh.vao, m_FloorMesh.vbo, m_FloorMesh.ebo, &m_FloorMesh.indices);
 }
 
 void Floor::Draw(const Shader& shader)
