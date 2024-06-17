@@ -6,6 +6,13 @@ void resizeCallback(GLFWwindow* window, int newWidth, int newHeight)
 	currentWindow->SetWidth(newWidth);
 	currentWindow->SetHeight(newHeight);
 	glViewport(0, 0, newWidth, newHeight);
+
+	for (unsigned int i = 0; i < currentWindow->resizeEvents.size(); i++)
+	{
+		currentWindow->resizeEvents[i]();
+	}
+
+
 }
 
 Window::Window(const int& width, const int& height, const char* title)
