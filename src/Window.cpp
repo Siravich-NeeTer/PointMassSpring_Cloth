@@ -18,7 +18,7 @@ void resizeCallback(GLFWwindow* window, int newWidth, int newHeight)
 Window::Window(const int& width, const int& height, const char* title)
 	: m_Width(width), m_Height(height), m_Title(title), m_Window(nullptr)
 {
-
+	Init();
 }
 
 void Window::MakeContextCurrent()
