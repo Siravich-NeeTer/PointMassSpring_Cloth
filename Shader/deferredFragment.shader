@@ -48,5 +48,5 @@ void main()
         lighting += diffuse + specular;        
     }
     FragColor = vec4(lighting, 1.0);
-    //FragColor = vec4(abs(FragPos), 1.0f);
+    //FragColor = vec4(abs(Normal), 1.0f);
 }
