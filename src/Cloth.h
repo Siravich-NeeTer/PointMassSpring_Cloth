@@ -4,7 +4,6 @@
 #include <vector>
 #include <array>
 #include <map>
-#include <omp.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -104,18 +103,9 @@ class Cloth : public Object
 		int& GetClothResolution() const;
 		PointMass* GetPointMass(const int& index) const;
 		PointMass* GetPointMass(const int& row, const int& column) const;
-
 		std::vector<PointMass*> GetStructuralXAxisNeighborPointMass(const int& row, const int& column) const;
 		std::vector<PointMass*> GetStructuralYAxisNeighborPointMass(const int& row, const int& column) const;
 		std::vector<PointMass*> GetShearNeighborPointMass(const int& row, const int& column) const;
 		std::vector<PointMass*> GetFlexionXAxisNeighborPointMass(const int& row, const int& column) const;
 		std::vector<PointMass*> GetFlexionYAxisNeighborPointMass(const int& row, const int& column) const;
-
-		void GetStructuralXAxisNeighborPointMass(const int& row, const int& column, PointMass* pointMassList[], size_t& newSize) const;
-		void GetStructuralYAxisNeighborPointMass(const int& row, const int& column, PointMass* pointMassList[], size_t& newSize) const;
-		void GetShearNeighborPointMass(const int& row, const int& column, PointMass* pointMassList[], size_t& newSize) const;
-		void GetFlexionXAxisNeighborPointMass(const int& row, const int& column, PointMass* pointMassList[], size_t& newSize) const;
-		void GetFlexionYAxisNeighborPointMass(const int& row, const int& column, PointMass* pointMassList[], size_t& newSize) const;
-
-		
 };

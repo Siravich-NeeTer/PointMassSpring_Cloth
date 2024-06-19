@@ -90,9 +90,6 @@
     <ClCompile Include="src\Renderer\MeshUtility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ClothSimulationApp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\objectFragment.shader">
@@ -101,26 +98,8 @@
     <None Include="Shader\objectVertex.shader">
       <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="Shader\gBufferVertex.shader">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
-    <None Include="Shader\SkyBoxFragment.shader">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
-    <None Include="Shader\SkyBoxVertex.shader">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
-    <None Include="Shader\gBufferFragment.shader">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
-    <None Include="Shader\deferredFragment.shader">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
-    <None Include="Shader\deferredVertex.shader">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
-    <None Include="Shader\lightBoxFragment.shader" />
-    <None Include="Shader\lightBoxVertex.shader" />
+    <None Include="Shader\SkyBoxVertex.shader" />
+    <None Include="Shader\SkyBoxFragment.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="External Libraries\stb\stb_image.h">
@@ -202,9 +181,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Renderer\SkyBox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ClothSimulationApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

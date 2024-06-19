@@ -4,8 +4,6 @@
 #include <glfw/glfw3.h>
 
 #include <iostream>
-#include <functional>
-#include <vector>
 
 #include "Input.h"
 
@@ -41,6 +39,4 @@ class Window
 		// Core-Loop
 		void Init();
 		void Destroy();
-
-		std::vector<std::function<void()>> resizeEvents;
 };
