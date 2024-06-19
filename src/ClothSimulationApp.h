@@ -263,4 +263,6 @@ class ClothSimulationApp
 
 			ImGui::End();
 		}
+
+		void UpdateMousePicking(const glm::mat4& view, const glm::mat4 &proj);
 };
