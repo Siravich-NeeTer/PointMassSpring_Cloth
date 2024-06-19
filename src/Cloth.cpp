@@ -22,6 +22,57 @@ Cloth::Cloth(const float& mass, const int& samplerAmount, const float& clothSize
 		}
 	}
 
+	for (int row = 0; row < samplerAmount; row++)
+	{
+		for (int col = 0; col < samplerAmount; col++)
+		{
+			int index = (row * samplerAmount) + col;
+			size_t& size = m_PointMass[index]->neighborSize;
+			PointMass* currentPointMass = m_PointMass[index];
+
+			// Left
+			if (col - 1 >= 0)
+				currentPointMass->neighborList[size++] = { GetPointMass(row, col - 1), STRUCTURAL_X };
+			// Right
+			if (col + 1 < m_SamplerAmount)
+				currentPointMass->neighborList[size++] = { GetPointMass(row, col + 1), STRUCTURAL_X };
+			
+			// Up
+			if (row - 1 >= 0)
+				currentPointMass->neighborList[size++] = { GetPointMass(row - 1, col), STRUCTURAL_Y };
+			// Down
+			if (row + 1 < m_SamplerAmount)
+				currentPointMass->neighborList[size++] = { GetPointMass(row + 1, col), STRUCTURAL_Y };
+
+			// Up_Left
+			if (row - 1 >= 0 && col - 1 >= 0)
+				currentPointMass->neighborList[size++] = { GetPointMass(row - 1, col - 1), SHEAR };
+			// Down_Left
+			if (row + 1 < m_SamplerAmount && col - 1 >= 0)
+				currentPointMass->neighborList[size++] = { GetPointMass(row + 1, col - 1), SHEAR };
+			// Up_Right
+			if (row - 1 >= 0 && col + 1 < m_SamplerAmount)
+				currentPointMass->neighborList[size++] = { GetPointMass(row - 1, col + 1), SHEAR };
+			// Down_Right
+			if (row + 1 < m_SamplerAmount && col + 1 < m_SamplerAmount)
+				currentPointMass->neighborList[size++] = { GetPointMass(row + 1, col + 1), SHEAR };
+			
+			// Left-Left
+			if (col - 2 >= 0)
+				currentPointMass->neighborList[size++] = { GetPointMass(row, col - 2), FLEXION_X };
+			// Right-Right
+			if (col + 2 < m_SamplerAmount)
+				currentPointMass->neighborList[size++] = { GetPointMass(row, col + 2), FLEXION_X };
+
+			// Up-Up
+			if (row - 2 >= 0)
+				currentPointMass->neighborList[size++] = { GetPointMass(row - 2, col), FLEXION_Y };
+			// Down-Down
+			if (row + 2 < m_SamplerAmount)
+				currentPointMass->neighborList[size++] = { GetPointMass(row + 2, col), FLEXION_Y };
+		}
+	}
+
 	GenerateCubeBuffer(m_PointMassMesh.vao, m_PointMassMesh.vbo, m_PointMassMesh.ebo, &m_PointMassMesh.indices);
 	m_ClothTexture.SetTexture("Texture/RedCloth.jpg");
 }
@@ -79,15 +130,6 @@ void Cloth::DrawWireframe(const Shader& shader)
 		{
 			PointMass* currentPointMass = GetPointMass(row, col);
 
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, currentPointMass->position);
-			model = glm::scale(model, glm::vec3(m_EachLength / 5.0f, m_EachLength / 5.0f, m_EachLength / 5.0f));
-
-			shader.SetMat4("u_Model", model);
-			shader.SetVec3("u_Color", glm::vec3(1.0f, 0.0f, 0.0f));
-
-			glDrawElements(GL_TRIANGLES, m_PointMassMesh.indices.size(), GL_UNSIGNED_INT, m_PointMassMesh.indices.data());
-
 			if (row + 1 < m_SamplerAmount)
 			{
 				vertices.push_back(currentPointMass->position);
@@ -132,6 +174,7 @@ void Cloth::DrawTexture(const Camera& camera, const Shader& shader)
 		glm::vec3(length, 0.0f, length / 2.0f),
 	};
 	
+	/*
 	m_ClothTexture.Activate(GL_TEXTURE0);
 
 	shader.Activate();
@@ -146,6 +189,10 @@ void Cloth::DrawTexture(const Camera& camera, const Shader& shader)
 	shader.SetVec3("u_LightPos[3]", lightPos[3]);
 	shader.SetVec3("u_LightPos[4]", lightPos[4]);
 	shader.SetVec3("u_CameraPos", camera.GetPosition());
+	*/
+
+	m_ClothTexture.Activate(GL_TEXTURE0);
+	shader.SetMat4("u_Model", glm::mat4(1.0f));
 
 	// Compute Normal
 	for (int row = 0; row < m_SamplerAmount - 1; row++)
@@ -243,6 +290,8 @@ void Cloth::DrawTexture(const Camera& camera, const Shader& shader)
 	m_ClothMesh.ebo.UnBind();
 	m_ClothMesh.vao.UnBind();
 }
+
+
 void Cloth::UpdateForce(const float& dt, const Sphere& sphere, const Floor& floor)
 {
 	float k = sqrt(kx * kx + ky * ky);
@@ -254,40 +303,23 @@ void Cloth::UpdateForce(const float& dt, const Sphere& sphere, const Floor& floo
 		{
 			PointMass* currentPointMass = GetPointMass(row, col);
 
-			std::vector<PointMass*> structuralXAxisNeighborPointMass = GetStructuralXAxisNeighborPointMass(row, col);
-			std::vector<PointMass*> structuralYAxisNeighborPointMass = GetStructuralYAxisNeighborPointMass(row, col);
-			std::vector<PointMass*> shearNeighborPointMass = GetShearNeighborPointMass(row, col);
-			std::vector<PointMass*> flexionXAxisNeighborPointMass = GetFlexionXAxisNeighborPointMass(row, col);
-			std::vector<PointMass*> flexionYAxisNeighborPointMass = GetFlexionYAxisNeighborPointMass(row, col);
-
 			// Apply Gravitational Force
 			currentPointMass->force += m_EachMass * glm::vec3(0.0f, -g, 0.0f);
 
 			// Apply Spring Force
-			for (int i = 0; i < structuralXAxisNeighborPointMass.size(); i++)
+			for (int pm_index = 0; pm_index < currentPointMass->neighborSize; pm_index++)
 			{
-				glm::vec3 v = structuralXAxisNeighborPointMass[i]->position - currentPointMass->position;
-				currentPointMass->force += glm::normalize(v) * (glm::length(v) - m_EachLength) * kx;
-			}
-			for (int i = 0; i < structuralXAxisNeighborPointMass.size(); i++)
-			{
-				glm::vec3 v = structuralXAxisNeighborPointMass[i]->position - currentPointMass->position;
-				currentPointMass->force += glm::normalize(v) * (glm::length(v) - m_EachLength) * ky;
-			}
-			for (int i = 0; i < shearNeighborPointMass.size(); i++)
-			{
-				glm::vec3 v = shearNeighborPointMass[i]->position - currentPointMass->position;
-				currentPointMass->force += glm::normalize(v) * (glm::length(v) - m_EachLength * SQRT_2) * k;
-			}
-			for (int i = 0; i < flexionXAxisNeighborPointMass.size(); i++)
-			{
-				glm::vec3 v = flexionXAxisNeighborPointMass[i]->position - currentPointMass->position;
-				currentPointMass->force += glm::normalize(v) * (glm::length(v) - m_EachLength * 2.0f) * kx;
-			}
-			for (int i = 0; i < flexionYAxisNeighborPointMass.size(); i++)
-			{
-				glm::vec3 v = flexionYAxisNeighborPointMass[i]->position - currentPointMass->position;
-				currentPointMass->force += glm::normalize(v) * (glm::length(v) - m_EachLength * 2.0f) * ky;
+				glm::vec3 v = currentPointMass->neighborList[pm_index].first->position - currentPointMass->position;
+				if(currentPointMass->neighborList[pm_index].second == STRUCTURAL_X)
+					currentPointMass->force += glm::normalize(v) * (glm::length(v) - m_EachLength) * kx;
+				else if (currentPointMass->neighborList[pm_index].second == STRUCTURAL_Y)
+					currentPointMass->force += glm::normalize(v) * (glm::length(v) - m_EachLength) * ky;
+				else if (currentPointMass->neighborList[pm_index].second == SHEAR)
+					currentPointMass->force += glm::normalize(v) * (glm::length(v) - m_EachLength * SQRT_2) * k;
+				else if (currentPointMass->neighborList[pm_index].second == FLEXION_X)
+					currentPointMass->force += glm::normalize(v) * (glm::length(v) - m_EachLength * 2.0f) * kx;
+				else if (currentPointMass->neighborList[pm_index].second == FLEXION_Y)
+					currentPointMass->force += glm::normalize(v) * (glm::length(v) - m_EachLength * 2.0f) * ky;
 			}
 
 			// Apply Wind Force
@@ -306,6 +338,7 @@ void Cloth::UpdateForce(const float& dt, const Sphere& sphere, const Floor& floo
 
 			// F = ma
 			// a = F / m
+			//currentPointMass->acceleration = m_EachMassInvert * currentPointMass->force;
 			currentPointMass->acceleration = m_EachMassInvert * currentPointMass->force * dt;
 			//std::cout << currentPointMass->acceleration.x << " " << currentPointMass->acceleration.y << " " << currentPointMass->acceleration.z << "\n";
 
@@ -320,7 +353,7 @@ void Cloth::UpdateForce(const float& dt, const Sphere& sphere, const Floor& floo
 	if (m_PinPoint[1]) { GetPointMass(0, m_SamplerAmount - 1)->acceleration = glm::vec3(0.0f); }
 	if (m_PinPoint[2]) { GetPointMass(m_SamplerAmount - 1, 0)->acceleration = glm::vec3(0.0f); }
 	if (m_PinPoint[3]) { GetPointMass(0, 0)->acceleration = glm::vec3(0.0f); }
-
+	
 	for (int row = 0; row < m_SamplerAmount; row++)
 	{
 		for (int col = 0; col < m_SamplerAmount; col++)
@@ -351,7 +384,7 @@ void Cloth::UpdateForce(const float& dt, const Sphere& sphere, const Floor& floo
 				}
 			}
 
-			maxVelo = (glm::length(currentPointMass->velocity) > glm::length(maxVelo) ? currentPointMass->velocity : maxVelo);
+			//maxVelo = (glm::length(currentPointMass->velocity) > glm::length(maxVelo) ? currentPointMass->velocity : maxVelo);
 
 		}
 	}
@@ -366,7 +399,7 @@ void Cloth::UpdateForce(const float& dt, const Sphere& sphere, const Floor& floo
 		PointMass* pm1 = m_PointMass[i];
 		std::vector<PointMass*>& nearby_pms = m_SpatialMap[HashPosition(pm1->position)];
 		for (int j = 0; j < nearby_pms.size(); j++) 
-		{
+		{	
 			PointMass* pm2 = nearby_pms[j];
 			if (pm1 != pm2) 
 			{
@@ -519,6 +552,103 @@ std::vector<PointMass*> Cloth::GetFlexionYAxisNeighborPointMass(const int& row, 
 	return ret;
 }
 
+void Cloth::GetStructuralXAxisNeighborPointMass(const int& row, const int& column, PointMass* pointMassList[], size_t& newSize) const
+{
+	newSize = 0;
+
+	// Left
+	if (column - 1 >= 0)
+	{
+		pointMassList[newSize] = GetPointMass(row, column - 1);
+		newSize++;
+	}
+	// Right
+	if (column + 1 < m_SamplerAmount)
+	{
+		pointMassList[newSize] = GetPointMass(row, column + 1);
+		newSize++;
+	}
+}
+void Cloth::GetStructuralYAxisNeighborPointMass(const int& row, const int& column, PointMass* pointMassList[], size_t& newSize) const
+{
+	newSize = 0;
+	
+	// Up
+	if (row - 1 >= 0)
+	{
+		pointMassList[newSize] = GetPointMass(row - 1, column);
+		newSize++;
+	}
+	// Down
+	if (row + 1 < m_SamplerAmount)
+	{
+		pointMassList[newSize] = GetPointMass(row + 1, column);
+		newSize++;
+	}
+}
+void Cloth::GetShearNeighborPointMass(const int& row, const int& column, PointMass* pointMassList[], size_t& newSize) const
+{
+	newSize = 0;
+
+	// Up_Left
+	if (row - 1 >= 0 && column - 1 >= 0)
+	{
+		pointMassList[newSize] = GetPointMass(row - 1, column - 1);
+		newSize++;
+	}
+	// Down_Left
+	if (row + 1 < m_SamplerAmount && column - 1 >= 0)
+	{
+		pointMassList[newSize] = GetPointMass(row + 1, column - 1);
+		newSize++;
+	}
+	// Up_Right
+	if (row - 1 >= 0 && column + 1 < m_SamplerAmount)
+	{
+		pointMassList[newSize] = GetPointMass(row - 1, column + 1);
+		newSize++;
+	}
+	// Down_Right
+	if (row + 1 < m_SamplerAmount && column + 1 < m_SamplerAmount)
+	{
+		pointMassList[newSize] = GetPointMass(row + 1, column + 1);
+		newSize++;
+	}
+}
+void Cloth::GetFlexionXAxisNeighborPointMass(const int& row, const int& column, PointMass* pointMassList[], size_t& newSize) const
+{
+	newSize = 0;
+
+	// Left-Left
+	if (column - 2 >= 0)
+	{
+		pointMassList[newSize] = GetPointMass(row, column - 2);
+		newSize++;
+	}
+	// Right-Right
+	if (column + 2 < m_SamplerAmount)
+	{
+		pointMassList[newSize] = GetPointMass(row, column + 2);
+		newSize++;
+	}
+}
+void Cloth::GetFlexionYAxisNeighborPointMass(const int& row, const int& column, PointMass* pointMassList[], size_t& newSize) const
+{
+	newSize = 0;
+
+	// Up-Up
+	if (row - 2 >= 0)
+	{
+		pointMassList[newSize] = GetPointMass(row - 2, column);
+		newSize++;
+	}
+	// Down-Down
+	if (row + 2 < m_SamplerAmount)
+	{
+		pointMassList[newSize] = GetPointMass(row + 2, column);
+		newSize++;
+	}
+}
 // ---------------------- Private Function ----------------------
 int Cloth::GetIndex(const int& row, const int& column)
 {
