@@ -130,3 +130,90 @@ void GenerateCubeBufferWithTexture(const VAO& vertexArray, const VBO& vertexBuff
 	vertexArray.Attribute(vertexBuffer, 0, 3, GL_FLOAT, 5 * sizeof(float), 0);
 	vertexArray.Attribute(vertexBuffer, 2, 2, GL_FLOAT, 5 * sizeof(float), 3 * sizeof(float));
 }
+
+void GenerateCubeBufferWithTextureNormal(const VAO& vertexArray, const VBO& vertexBuffer, const EBO& elementBuffer, std::vector<GLuint>* indices)
+{
+	std::vector<GLuint> cubeIndices =
+	{
+		// Front face
+		0, 1, 2,  // Triangle 1
+		1, 3, 2,  // Triangle 2
+
+		// Back face
+		4, 6, 5,  // Triangle 1
+		5, 6, 7,  // Triangle 2
+
+		// Left face
+		8, 9, 10,  // Triangle 1
+		9, 11, 10, // Triangle 2
+
+		// Right face
+		12, 14, 13,  // Triangle 1
+		13, 14, 15,  // Triangle 2
+
+		// Top face
+		16, 18, 17,  // Triangle 1
+		17, 18, 19,  // Triangle 2
+
+		// Bottom face
+		20, 21, 22,  // Triangle 1
+		21, 23, 22   // Triangle 2
+	};
+
+	std::vector<float> cubeVertices =
+	{
+		// Front face
+			// Position(3)		// Normal(3)	// Texture(2)
+		-0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,  // Bottom left
+		 0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,  // Bottom right
+		-0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,  // Top left
+		 0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,  // Top right
+
+		// Back face
+			// Position(3)		// Normal(3)	// Texture(2)
+		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,  // Bottom left
+		 0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,  // Bottom right
+		-0.5f,  0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,  // Top left
+		 0.5f,  0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,  // Top right
+
+		// Left face
+			// Position(3)		// Normal(3)	// Texture(2)
+	   -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,  // Bottom front
+	   -0.5f,  0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,  // Top front
+	   -0.5f, -0.5f,  0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  // Bottom back
+	   -0.5f,  0.5f,  0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,  // Top back
+
+		// Right face
+			// Position(3)		// Normal(3)	// Texture(2)
+	    0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,  // Bottom front
+	    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,  // Top front
+	    0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f,  // Bottom back
+	    0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,  // Top back
+
+		// Top face
+			// Position(3)		// Normal(3)	// Texture(2)
+		-0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,  // Front left
+		 0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,  // Front right
+		-0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,  // Back left
+		 0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,  // Back right
+
+		// Bottom face
+			// Position(3)		// Normal(3)	// Texture(2)
+		-0.5f, -0.5f,  0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,  // Front left
+		 0.5f, -0.5f,  0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,  // Front right
+		-0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,  // Back left
+		 0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,  // Back right
+	};
+
+	if (indices != nullptr)
+	{
+		*indices = cubeIndices;
+	}
+
+	vertexBuffer.BufferData(sizeof(float) * cubeVertices.size(), cubeVertices.data(), false);
+	elementBuffer.BufferData(sizeof(GLuint) * cubeIndices.size(), cubeIndices.data(), false);
+
+	vertexArray.Attribute(vertexBuffer, 0, 3, GL_FLOAT, 8 * sizeof(float), 0);
+	vertexArray.Attribute(vertexBuffer, 1, 3, GL_FLOAT, 8 * sizeof(float), 3 * sizeof(float));
+	vertexArray.Attribute(vertexBuffer, 2, 2, GL_FLOAT, 8 * sizeof(float), 6 * sizeof(float));
+}

@@ -6,12 +6,19 @@ void resizeCallback(GLFWwindow* window, int newWidth, int newHeight)
 	currentWindow->SetWidth(newWidth);
 	currentWindow->SetHeight(newHeight);
 	glViewport(0, 0, newWidth, newHeight);
+
+	for (unsigned int i = 0; i < currentWindow->resizeEvents.size(); i++)
+	{
+		currentWindow->resizeEvents[i]();
+	}
+
+
 }
 
 Window::Window(const int& width, const int& height, const char* title)
 	: m_Width(width), m_Height(height), m_Title(title), m_Window(nullptr)
 {
-
+	Init();
 }
 
 void Window::MakeContextCurrent()
@@ -53,8 +60,8 @@ float Window::GetHeight() const { return m_Height; }
 void Window::Init()
 {
 	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	
 	m_Window = glfwCreateWindow(m_Width, m_Height, m_Title, nullptr, nullptr);
@@ -76,10 +83,21 @@ void Window::Init()
 		exit(EXIT_FAILURE);
 	}
 
+	/*  Hidden surface removal */
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+
+	/*  Enable writing to depth buffer */
+	glDepthMask(GL_TRUE);
+	
 	glDisable(GL_CULL_FACE);
-	glEnable(GL_BLEND);
+	
+	// Comment off since it make deferred shading gone wrong
+	// https://stackoverflow.com/questions/67548623/deferred-rendering-not-displaying-the-gbuffer-textures
+	//glEnable(GL_BLEND);		
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+
 
 	glViewport(0, 0, m_Width, m_Height);
 }
