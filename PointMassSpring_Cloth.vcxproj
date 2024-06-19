@@ -29,26 +29,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -159,7 +159,6 @@
     <ClCompile Include="External Libraries\imgui\imgui_tables.cpp" />
     <ClCompile Include="External Libraries\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\Cloth.cpp" />
-    <ClCompile Include="src\ClothSimulationApp.cpp" />
     <ClCompile Include="src\Floor.cpp" />
     <ClCompile Include="src\PointMass.cpp" />
     <ClCompile Include="src\Constant.cpp" />
@@ -186,7 +185,6 @@
     <ClInclude Include="External Libraries\imgui\imstb_rectpack.h" />
     <ClInclude Include="External Libraries\imgui\imstb_textedit.h" />
     <ClInclude Include="External Libraries\imgui\imstb_truetype.h" />
-    <ClInclude Include="src\ClothSimulationApp.h" />
     <ClInclude Include="src\FPSCounter.h" />
     <ClInclude Include="src\Cloth.h" />
     <ClInclude Include="src\Constant.h" />
@@ -208,12 +206,6 @@
     <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shader\lightBoxFragment.shader" />
-    <None Include="Shader\lightBoxVertex.shader" />
-    <None Include="Shader\deferredFragment.shader" />
-    <None Include="Shader\deferredVertex.shader" />
-    <None Include="Shader\gBufferFragment.shader" />
-    <None Include="Shader\gBufferVertex.shader" />
     <None Include="Shader\objectFragment.shader" />
     <None Include="Shader\objectVertex.shader" />
     <None Include="Shader\SkyBoxFragment.shader" />
