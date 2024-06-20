@@ -123,7 +123,24 @@ void ClothSimulationApp::Render()
 
 	// ------------------ Update Process ------------------
 	if (startSimulate)
-		cloth.UpdateForce(dt, sphere, floor);
+	{
+		const int step = 15;
+		for (int i = 0; i < step; i++)
+		{
+			cloth.UpdateForce(dt / step);
+		
+			if (hitPointMass && Input::isKeyPressed(GLFW_MOUSE_BUTTON_1) && !isCameraMove)
+			{
+				UpdateMousePicking(view, projection);
+
+				hitPointMass->position = ray.org + ray.dir * ray.t;
+				hitPointMass->acceleration = glm::vec3(0.0f);
+				hitPointMass->velocity = glm::vec3(0.0f);
+			}
+
+			cloth.UpdateCollision(dt / step, sphere, floor);
+		}
+	}
 
 	// ------------------ Render gBuffer ------------------
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);

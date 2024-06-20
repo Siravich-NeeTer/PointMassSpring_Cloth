@@ -10,7 +10,7 @@ float g = 9.81f;
 float kx = 0.9206f;
 float ky = 0.44936f;
 float m = 0.1572f;
-float TimeStep = 1.0f / 60.0f;
+float TimeStep = 1.0f / 10.0f;
 
 void ResetConstant()
 {
@@ -19,5 +19,5 @@ void ResetConstant()
 	kx = 0.9206f;
 	ky = 0.44936f;
 	m = 0.1572f;
-	TimeStep = 1.0f / 60.0f;
+	TimeStep = 1.0f / 10.0f;
 }
