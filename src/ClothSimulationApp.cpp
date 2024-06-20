@@ -122,7 +122,7 @@ void ClothSimulationApp::Render()
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), window.GetWidth() / window.GetHeight(), 0.1f, 100.0f);
 
 
-	if (Input::isKeyBeginPressed(GLFW_MOUSE_BUTTON_1) && !isCameraMove)
+	if ((Input::isKeyBeginPressed(GLFW_MOUSE_BUTTON_1) || Input::isKeyBeginPressed(GLFW_MOUSE_BUTTON_2)) && !isCameraMove)
 	{
 		cloth.UpdateBVH();
 		UpdateMousePicking(view, projection);
@@ -144,6 +144,14 @@ void ClothSimulationApp::Render()
 				hitPointMass->position = ray.org + ray.dir * ray.t;
 				hitPointMass->acceleration = glm::vec3(0.0f);
 				hitPointMass->velocity = glm::vec3(0.0f);
+			}
+			else if (Input::isKeyPressed(GLFW_MOUSE_BUTTON_2) && !isCameraMove)
+			{
+				UpdateMousePicking(view, projection);
+				cloth.UpdateRaycast(ray.org, ray.dir, ray.t, hitPointMass);
+
+				if(hitPointMass)
+					hitPointMass->isActive = false;
 			}
 
 			cloth.UpdateCollision(dt / step, sphere, floor);

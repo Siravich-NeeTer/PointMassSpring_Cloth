@@ -22,6 +22,8 @@ class PointMass
 		glm::vec3 acceleration = glm::vec3(0.0f, 0.0f, 0.0f);
 		glm::vec3 force = glm::vec3(0.0f, 0.0f, 0.0f);
 
+		bool isActive = true;
+
 		std::pair<PointMass*, NeighborType> neighborList[12];
 		size_t neighborSize = 0;
 
