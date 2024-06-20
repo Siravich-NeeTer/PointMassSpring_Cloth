@@ -23,7 +23,22 @@
 #include "Sphere.h"
 #include "Floor.h"
 
+#include <bvh/v2/bvh.h>
+#include <bvh/v2/vec.h>
+#include <bvh/v2/ray.h>
+#include <bvh/v2/node.h>
+#include <bvh/v2/default_builder.h>
+#include <bvh/v2/thread_pool.h>
+#include <bvh/v2/executor.h>
+#include <bvh/v2/stack.h>
+
 #define SQRT_2 1.414213f
+
+using Vec3 = bvh::v2::Vec<float, 3>;
+using BBox = bvh::v2::BBox<float, 3>;
+using Node = bvh::v2::Node<float, 3>;
+using Bvh = bvh::v2::Bvh<Node>;
+using Ray = bvh::v2::Ray<float, 3>;
 
 class Cloth : public Object
 {
@@ -77,6 +92,13 @@ class Cloth : public Object
 
 		std::map<int, std::vector<PointMass*>> m_SpatialMap;
 
+		bvh::v2::ThreadPool thread_pool;
+		bvh::v2::ParallelExecutor executor;
+		Bvh bvh;
+		bvh::v2::DefaultBuilder<Node>::Config Config;
+		std::vector<BBox> BoxesList;
+		std::vector<Vec3> CenterList;
+
 		int GetIndex(const int& row, const int& column);
 		int HashPosition(const glm::vec3& position);
 		void BuildSpatialMap();
@@ -93,7 +115,8 @@ class Cloth : public Object
 
 		void DrawWireframe(const Shader& shader);
 		void DrawTexture(const Camera& camera, const Shader& shader);
-		void UpdateForce(const float& dt, const Sphere& sphere, const Floor& floor);
+		void UpdateForce(const float& dt);
+		void UpdateCollision(const float& dt, const Sphere& sphere, const Floor& floor);
 
 		int GetSamplerAmount() const;
 		float GetClothSize() const;
@@ -117,5 +140,7 @@ class Cloth : public Object
 		void GetFlexionXAxisNeighborPointMass(const int& row, const int& column, PointMass* pointMassList[], size_t& newSize) const;
 		void GetFlexionYAxisNeighborPointMass(const int& row, const int& column, PointMass* pointMassList[], size_t& newSize) const;
 
-		
+		void UpdateBVH();
+		void UpdateRaycast(const glm::vec3& rayOrg, const glm::vec3& rayDir, float &t, PointMass* &hitPointMass);
+		bool RayAABB(Ray& ray, const BBox& aabb);
 };
