@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1718917315.9215 "d:/GitHub/PointMassSpring_Cloth/LaTex/PointMassSpring_Cloth_CuttingMethod.tex" "PointMassSpring_Cloth_CuttingMethod.pdf" "PointMassSpring_Cloth_CuttingMethod" 1718917317.58277 0
+["pdflatex"] 1718924161.70316 "d:/GitHub/PointMassSpring_Cloth/LaTex/PointMassSpring_Cloth_CuttingMethod.tex" "PointMassSpring_Cloth_CuttingMethod.pdf" "PointMassSpring_Cloth_CuttingMethod" 1718924163.41183 0
   "C:/Users/ASUS/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1718916681 80909 eab91d9745dd2edfd62a31d53cd5fe15 ""
   "C:/Users/ASUS/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1718900301 24263555 b731a1fba8c9cf27061e08a41010ccf4 ""
   "C:/Users/ASUS/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmbx10.tfm" 1136765053 1328 c834bbb027764024c09d3d2bf908b5f0 ""
@@ -72,10 +72,10 @@
   "C:/Users/ASUS/AppData/Local/Programs/MiKTeX/tex/latex/tools/multicol.sty" 1717270872 32621 00e86c03dbf6e71d7ea7ebac2bd4fcaf ""
   "C:/Users/ASUS/AppData/Local/Programs/MiKTeX/tex/latex/tools/xspace.sty" 1717270872 4545 e3f4de576c914e2000f07f69a891c071 ""
   "C:/Users/ASUS/AppData/Local/Programs/MiKTeX/tex/latex/url/url.sty" 1388490452 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
-  "PointMassSpring_Cloth_CuttingMethod.aux" 1718917317 1103 9c542050951c613a963c367f0ae3db3a "pdflatex"
-  "PointMassSpring_Cloth_CuttingMethod.out" 1718917317 954 906f2b6938a8edeb1ddd5ff97d047aef "pdflatex"
-  "PointMassSpring_Cloth_CuttingMethod.tex" 1718917315 10829 ff2545094ebe8764c64e32add63e74b3 ""
-  "d:/GitHub/PointMassSpring_Cloth/LaTex/PointMassSpring_Cloth_CuttingMethod.tex" 1718917315 10829 ff2545094ebe8764c64e32add63e74b3 ""
+  "PointMassSpring_Cloth_CuttingMethod.aux" 1718924163 1103 9c542050951c613a963c367f0ae3db3a "pdflatex"
+  "PointMassSpring_Cloth_CuttingMethod.out" 1718924163 954 906f2b6938a8edeb1ddd5ff97d047aef "pdflatex"
+  "PointMassSpring_Cloth_CuttingMethod.tex" 1718924160 10927 d3dcc49570f6b5471059c6c323afce7a ""
+  "d:/GitHub/PointMassSpring_Cloth/LaTex/PointMassSpring_Cloth_CuttingMethod.tex" 1718924160 10927 d3dcc49570f6b5471059c6c323afce7a ""
   "images/BVH.png" 1718916257 26786 8a3d1e827d9ecd7fc9c67015cfb1d607 ""
   "images/ClothCutting.png" 1718912622 2045148 d0967dcb172b48257f9eb055e78eb96b ""
   "images/ClothDragging.png" 1718912529 2097970 2af0f466978f5fea233fef521b273f46 ""
