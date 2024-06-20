@@ -124,6 +124,7 @@ void ClothSimulationApp::Render()
 
 	if (Input::isKeyBeginPressed(GLFW_MOUSE_BUTTON_1) && !isCameraMove)
 	{
+		cloth.UpdateBVH();
 		UpdateMousePicking(view, projection);
 	}
 
@@ -140,7 +141,10 @@ void ClothSimulationApp::Render()
 
 	sphere.Draw(geometryPassShader);
 	floor.Draw(geometryPassShader);
-	cloth.DrawTexture(camera, geometryPassShader);
+	if (renderType)
+		cloth.DrawWireframe(geometryPassShader);
+	else
+		cloth.DrawTexture(camera, geometryPassShader);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// ------------------ Render Lighting ------------------
@@ -292,9 +296,10 @@ void ClothSimulationApp::UpdateMousePicking(const glm::mat4& view, const glm::ma
 	glm::vec4 rayEye = glm::inverse(proj) * rayClip;
 	rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f);
 
-	glm::vec3 rayStart = camera.GetPosition();
+	glm::vec3 rayOrg = camera.GetPosition();
 	glm::vec3 rayDir = glm::vec3(glm::inverse(view) * rayEye);
 	rayDir = glm::normalize(rayDir);
 
-	std::cout << rayDir.x << ", " << rayDir.y << ", " << rayDir.z << "\n";
+	//std::cout << rayDir.x << ", " << rayDir.y << ", " << rayDir.z << "\n";
+	cloth.UpdateRaycast(rayOrg, rayDir);
 }
