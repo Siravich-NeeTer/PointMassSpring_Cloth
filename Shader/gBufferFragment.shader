@@ -11,6 +11,9 @@ in vec2 TexCoords;
 uniform sampler2D u_Texture_Diffuse;
 uniform sampler2D u_Texture_Specular;
 
+uniform bool u_UseDiffuseColor;
+uniform vec3 u_DiffuseColor;
+
 void main()
 {
 	// Store the fragment position vector in the first gbuffer texture
@@ -19,6 +22,10 @@ void main()
 	gNormal = normalize(Normal);
 	// And the diffuse per-fragment color
 	gAlbedoSpec.rgb = texture(u_Texture_Diffuse, TexCoords).rgb;
+    if(u_UseDiffuseColor)
+    {
+        gAlbedoSpec.rgb = u_DiffuseColor;
+    }
 	// Store specular intensity in gAlbedoSpec's alpha component
 	// TODO: Find Specular map (Texture) of the object
 	//gAlbedoSpec.a = texture(u_Texture_Specular, TexCoords).r;

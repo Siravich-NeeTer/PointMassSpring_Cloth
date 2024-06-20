@@ -104,7 +104,7 @@ class Cloth : public Object
 		void BuildSpatialMap();
 
 	public:
-		glm::vec3 maxVelo;
+		bool useDiffuseColor = false;
 
 		Cloth(const float& mass = 10.0f, const int& samplerAmount = 10, const float& clothSize = 10.0f);
 		~Cloth();

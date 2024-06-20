@@ -201,8 +201,15 @@ void Cloth::DrawTexture(const Camera& camera, const Shader& shader)
 	shader.SetVec3("u_CameraPos", camera.GetPosition());
 	*/
 
-	m_ClothTexture.Activate(GL_TEXTURE0);
+	if(useDiffuseColor)
+		m_DiffuseTexture.Activate(GL_TEXTURE0);
+	else
+		m_ClothTexture.Activate(GL_TEXTURE0);
+
+	shader.Activate();
 	shader.SetMat4("u_Model", glm::mat4(1.0f));
+	shader.SetBool("u_UseDiffuseColor", useDiffuseColor);
+	shader.SetVec3("u_DiffuseColor", m_Color);
 
 	// Compute Normal
 	for (int row = 0; row < m_SamplerAmount - 1; row++)
@@ -305,6 +312,8 @@ void Cloth::DrawTexture(const Camera& camera, const Shader& shader)
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, indices.data());
 	m_ClothMesh.ebo.UnBind();
 	m_ClothMesh.vao.UnBind();
+
+	shader.SetBool("u_UseDiffuseColor", false);
 }
 
 
