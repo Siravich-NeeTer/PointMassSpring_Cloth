@@ -11,6 +11,8 @@ void PointMass::Reset()
 	velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 	acceleration = glm::vec3(0.0f, 0.0f, 0.0f);
 	force = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	isActive = true;
 }
 
 void PointMass::UpdatePosition(const float& dt)

@@ -6,6 +6,7 @@ namespace Input
 	float mouseY;
 	bool keyPressed[GLFW_KEY_LAST];
 	bool keyBeginPressed[GLFW_KEY_LAST];
+	bool keyEndPressed[GLFW_KEY_LAST];
 
 	bool isKeyPressed(const int& key)
 	{
@@ -16,12 +17,18 @@ namespace Input
 	{
 		return keyBeginPressed[key];
 	}
+	
+	bool isKeyEndPressed(const int& key)
+	{
+		return keyEndPressed[key];
+	}
 
 	void endFrame()
 	{
 		for (int idx = 0; idx < GLFW_KEY_LAST; idx++)
 		{
 			keyBeginPressed[idx] = false;
+			keyEndPressed[idx] = false;
 		}
 	}
 
@@ -37,6 +44,9 @@ namespace Input
 		}
 		else if (action == GLFW_RELEASE)
 		{
+			if (keyPressed[key])
+				keyEndPressed[key] = true;
+
 			keyPressed[key] = false;
 			keyBeginPressed[key] = false;
 		}
@@ -62,6 +72,9 @@ namespace Input
 		}
 		else if (action == GLFW_RELEASE)
 		{
+			if (keyPressed[key])
+				keyEndPressed[key] = true;
+
 			keyPressed[key] = false;
 			keyBeginPressed[key] = false;
 		}
