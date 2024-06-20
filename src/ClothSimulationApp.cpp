@@ -121,6 +121,14 @@ void ClothSimulationApp::Render()
 	glm::mat4 view = camera.GetViewMatrix();
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), window.GetWidth() / window.GetHeight(), 0.1f, 100.0f);
 
+
+	if (Input::isKeyBeginPressed(GLFW_MOUSE_BUTTON_1) && !isCameraMove)
+	{
+		cloth.UpdateBVH();
+		UpdateMousePicking(view, projection);
+		cloth.UpdateRaycast(ray.org, ray.dir, ray.t, hitPointMass);
+	}
+
 	// ------------------ Update Process ------------------
 	if (startSimulate)
 	{
@@ -151,7 +159,10 @@ void ClothSimulationApp::Render()
 
 	sphere.Draw(geometryPassShader);
 	floor.Draw(geometryPassShader);
-	cloth.DrawTexture(camera, geometryPassShader);
+	if (renderType)
+		cloth.DrawWireframe(geometryPassShader);
+	else
+		cloth.DrawTexture(camera, geometryPassShader);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// ------------------ Render Lighting ------------------
@@ -291,4 +302,21 @@ void ClothSimulationApp::UpdateGBuffer()
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		throw std::runtime_error("[ERROR] UpdateGBuffer : Framebuffer not complete!");
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void ClothSimulationApp::UpdateMousePicking(const glm::mat4& view, const glm::mat4& proj)
+{
+	float x = (2.0f * Input::mouseX) / window.GetWidth() - 1.0f;
+	float y = 1.0f - (2.0f * Input::mouseY) / window.GetHeight();
+	float z = 1.0f;
+
+	glm::vec4 rayClip = glm::vec4(x, y, -1.0f, 1.0f);
+	glm::vec4 rayEye = glm::inverse(proj) * rayClip;
+	rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f);
+
+	ray.org = camera.GetPosition();
+	ray.dir = glm::vec3(glm::inverse(view) * rayEye);
+	ray.dir = glm::normalize(ray.dir);
+
+	//std::cout << rayDir.x << ", " << rayDir.y << ", " << rayDir.z << "\n";
 }

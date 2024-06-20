@@ -10,9 +10,11 @@ namespace Input
 	extern float mouseY;
 	extern bool keyPressed[GLFW_KEY_LAST];
 	extern bool keyBeginPressed[GLFW_KEY_LAST];
+	extern bool keyEndPressed[GLFW_KEY_LAST];
 
 	bool isKeyPressed(const int& key);
 	bool isKeyBeginPressed(const int& key);
+	bool isKeyEndPressed(const int& key);
 
 	void endFrame();
 
