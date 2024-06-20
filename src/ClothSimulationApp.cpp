@@ -104,7 +104,12 @@ void ClothSimulationApp::Render()
 	if (Input::isKeyBeginPressed(GLFW_KEY_SPACE))
 		startSimulate = true;
 	if (Input::isKeyBeginPressed(GLFW_KEY_1))
-		renderType = !renderType;
+		drawType = !drawType;
+	if (Input::isKeyBeginPressed(GLFW_KEY_2))
+	{
+		selectedRenderTypeIndex = (selectedRenderTypeIndex + 1) % 4;
+		selectedRenderType = renderType[selectedRenderTypeIndex];
+	}
 	if (Input::isKeyBeginPressed(GLFW_KEY_LEFT_ALT))
 	{
 		camera.ResetMousePosition();
@@ -122,7 +127,7 @@ void ClothSimulationApp::Render()
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), window.GetWidth() / window.GetHeight(), 0.1f, 100.0f);
 
 
-	if (Input::isKeyBeginPressed(GLFW_MOUSE_BUTTON_1) && !isCameraMove)
+	if ((Input::isKeyBeginPressed(GLFW_MOUSE_BUTTON_1) || Input::isKeyBeginPressed(GLFW_MOUSE_BUTTON_2)) && !isCameraMove)
 	{
 		cloth.UpdateBVH();
 		UpdateMousePicking(view, projection);
@@ -145,6 +150,14 @@ void ClothSimulationApp::Render()
 				hitPointMass->acceleration = glm::vec3(0.0f);
 				hitPointMass->velocity = glm::vec3(0.0f);
 			}
+			else if (Input::isKeyPressed(GLFW_MOUSE_BUTTON_2) && !isCameraMove)
+			{
+				UpdateMousePicking(view, projection);
+				cloth.UpdateRaycast(ray.org, ray.dir, ray.t, hitPointMass);
+
+				if(hitPointMass)
+					hitPointMass->isActive = false;
+			}
 
 			cloth.UpdateCollision(dt / step, sphere, floor);
 		}
@@ -159,7 +172,7 @@ void ClothSimulationApp::Render()
 
 	sphere.Draw(geometryPassShader);
 	floor.Draw(geometryPassShader);
-	if (renderType)
+	if (drawType)
 		cloth.DrawWireframe(geometryPassShader);
 	else
 		cloth.DrawTexture(camera, geometryPassShader);
@@ -174,6 +187,7 @@ void ClothSimulationApp::Render()
 	glBindTexture(GL_TEXTURE_2D, gNormal);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+	deferredShader.SetInt("u_RenderType", selectedRenderTypeIndex);
 	// send light relevant uniforms
 	for (unsigned int i = 0; i < 5; i++)
 	{
@@ -206,17 +220,20 @@ void ClothSimulationApp::Render()
 
 	// 3. render lights on top of scene
 	// --------------------------------
-	shaderLightBox.Activate();
-	shaderLightBox.SetMat4("projection", projection);
-	shaderLightBox.SetMat4("view", view);
-	for (unsigned int i = 0; i < 5; i++)
+	if (!isHideLight)
 	{
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, lightPos[i]);
-		model = glm::scale(model, glm::vec3(0.125f));
-		shaderLightBox.SetMat4("model", model);
-		shaderLightBox.SetVec3("lightColor", lightColor[i]);
-		renderCube();
+		shaderLightBox.Activate();
+		shaderLightBox.SetMat4("projection", projection);
+		shaderLightBox.SetMat4("view", view);
+		for (unsigned int i = 0; i < 5; i++)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, lightPos[i]);
+			model = glm::scale(model, glm::vec3(0.125f));
+			shaderLightBox.SetMat4("model", model);
+			shaderLightBox.SetVec3("lightColor", lightColor[i]);
+			renderCube();
+		}
 	}
 
 
@@ -229,7 +246,7 @@ void ClothSimulationApp::Render()
 	normalShader.SetBool("u_DoLight", false);
 
 
-	if(renderType)
+	if(drawType)
 		cloth.DrawWireframe(normalShader);
 	else
 		cloth.DrawTexture(cam, normalShader);

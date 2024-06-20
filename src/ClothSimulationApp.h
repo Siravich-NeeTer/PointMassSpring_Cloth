@@ -85,11 +85,15 @@ class ClothSimulationApp
 		unsigned int cubeVAO = 0;
 		unsigned int cubeVBO = 0;
 
-		// Debug Information
+		// UI Information
 		bool startSimulate = false;
 		bool isCameraMove = false;
-		bool renderType = false;
+		bool drawType = false;
 		bool isRenderSphere = true;
+		const char* renderType[4] = { "Deferred", "Diffuse", "Position", "Normal"};
+		const char* selectedRenderType = renderType[0];
+		int selectedRenderTypeIndex = 0;
+		bool isHideLight = true;
 		// Time
 		float prevTime = 0.0f;
 		float dt = 0.0f;
@@ -207,6 +211,20 @@ class ClothSimulationApp
 		{
 			ImGui::Begin("Cloth Simulation");
 
+			ImGui::Text("Input Instruction:");
+			ImGui::Text("W/A/S/D : Moving Camera");
+			ImGui::Text("Left ALT : Toggle Cursor Mode");
+			ImGui::Text("1 : Cloth Wireframe Mode");
+			ImGui::Text("2 : Toggle Render Mode");
+			if (isCameraMove)
+				ImGui::Text("Move Mouse : Rotate Camera");
+			if (startSimulate)
+			{
+				ImGui::Text("Left Click : Pickup/Drag Cloth");
+				ImGui::Text("Right Click : Cutting Cloth");
+			}
+			ImGui::NewLine();
+
 			if (ImGui::CollapsingHeader("Cloth"))
 			{
 				ImGui::Text("Cloth Stiffness");
@@ -218,6 +236,8 @@ class ClothSimulationApp
 
 				ImGui::Text("Cloth Resolution");
 				ImGui::SliderInt("Resolution", &cloth.GetClothResolution(), 1, 50);
+
+				ImGui::Checkbox("Wireframe", &drawType);
 
 				ImGui::Text("Wind Force");
 
@@ -240,6 +260,7 @@ class ClothSimulationApp
 				ImGui::SameLine(); ImGui::Checkbox("4", &cloth.GetPinPoint(3));
 
 				ImGui::Text("Cloth Color");
+				ImGui::Checkbox("Diffuse Color", &cloth.useDiffuseColor);
 				ImGui::ColorEdit3("Color(Cloth)", &cloth.GetColor()[0]);
 
 			}
@@ -255,6 +276,25 @@ class ClothSimulationApp
 				ImGui::DragFloat3("Position(Floor)", &floor.GetPosition()[0], 0.01f);
 				ImGui::ColorEdit3("Color(Floor)", &floor.GetColor()[0]);
 			}
+
+			ImGui::Text("Render Type");
+			ImGui::SameLine();
+			if (ImGui::BeginCombo("", selectedRenderType))
+			{
+				for (int n = 0; n < IM_ARRAYSIZE(renderType); n++)
+				{
+					bool is_selected = (selectedRenderType == renderType[n]); // You can store your selection however you want, outside or inside your objects
+					if (ImGui::Selectable(renderType[n], is_selected))
+					{
+						selectedRenderType = renderType[n];
+						selectedRenderTypeIndex = n;
+					}
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+				}
+				ImGui::EndCombo();
+			}
+			ImGui::Checkbox("Hide Light", &isHideLight);
 
 			ImGui::Text(("FPS : " + fpsCounter.GetFPS()).c_str());
 

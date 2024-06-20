@@ -20,6 +20,8 @@ const int NR_LIGHTS = 32;
 uniform Light lights[NR_LIGHTS];
 uniform vec3 viewPos;
 
+uniform int u_RenderType;
+
 void main()
 {             
     // retrieve data from gbuffer
@@ -47,6 +49,13 @@ void main()
         specular *= attenuation;
         lighting += diffuse + specular;        
     }
-    FragColor = vec4(lighting, 1.0);
-    //FragColor = vec4(abs(Normal), 1.0f);
+    
+    if(u_RenderType == 0)
+        FragColor = vec4(lighting, 1.0);
+    else if(u_RenderType == 1)
+        FragColor = vec4(Diffuse, 1.0);
+    else if(u_RenderType == 2)
+        FragColor = vec4(FragPos, 1.0);
+    else if(u_RenderType == 3)
+        FragColor = vec4(abs(Normal), 1.0);
 }

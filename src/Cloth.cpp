@@ -136,23 +136,26 @@ void Cloth::DrawWireframe(const Shader& shader)
 		for (int col = 0; col < m_SamplerAmount; col++)
 		{
 			PointMass* currentPointMass = GetPointMass(row, col);
+			
+			if (!currentPointMass->isActive)
+				continue;
 
-			if (row + 1 < m_SamplerAmount)
+			if (row + 1 < m_SamplerAmount && m_PointMass[GetIndex(row + 1, col)]->isActive)
 			{
 				vertices.push_back(currentPointMass->position);
 				vertices.push_back(m_PointMass[GetIndex(row + 1, col)]->position);
 			}
-			if (col + 1 < m_SamplerAmount)
+			if (col + 1 < m_SamplerAmount && m_PointMass[GetIndex(row, col + 1)]->isActive)
 			{
 				vertices.push_back(currentPointMass->position);
 				vertices.push_back(m_PointMass[GetIndex(row, col + 1)]->position);
 			}
-			if (row + 1 < m_SamplerAmount && col + 1 < m_SamplerAmount)
+			if (row + 1 < m_SamplerAmount && col + 1 < m_SamplerAmount && m_PointMass[GetIndex(row + 1, col + 1)]->isActive)
 			{
 				vertices.push_back(currentPointMass->position);
 				vertices.push_back(m_PointMass[GetIndex(row + 1, col + 1)]->position);
 			}
-			if (row + 1 < m_SamplerAmount && col - 1 >= 0)
+			if (row + 1 < m_SamplerAmount && col - 1 >= 0 && m_PointMass[GetIndex(row + 1, col - 1)]->isActive)
 			{
 				vertices.push_back(currentPointMass->position);
 				vertices.push_back(m_PointMass[GetIndex(row + 1, col - 1)]->position);
@@ -198,8 +201,15 @@ void Cloth::DrawTexture(const Camera& camera, const Shader& shader)
 	shader.SetVec3("u_CameraPos", camera.GetPosition());
 	*/
 
-	m_ClothTexture.Activate(GL_TEXTURE0);
+	if(useDiffuseColor)
+		m_DiffuseTexture.Activate(GL_TEXTURE0);
+	else
+		m_ClothTexture.Activate(GL_TEXTURE0);
+
+	shader.Activate();
 	shader.SetMat4("u_Model", glm::mat4(1.0f));
+	shader.SetBool("u_UseDiffuseColor", useDiffuseColor);
+	shader.SetVec3("u_DiffuseColor", m_Color);
 
 	// Compute Normal
 	for (int row = 0; row < m_SamplerAmount - 1; row++)
@@ -257,12 +267,18 @@ void Cloth::DrawTexture(const Camera& camera, const Shader& shader)
 			vertices.push_back(v4->normal);
 			vertices.push_back({ nextRow * m_EachClothResolution, nextCol * m_EachClothResolution, 0.0f });
 
-			indices.push_back(idx * 4);
-			indices.push_back(idx * 4 + 3);
-			indices.push_back(idx * 4 + 1);
-			indices.push_back(idx * 4);
-			indices.push_back(idx * 4 + 2);
-			indices.push_back(idx * 4 + 3);
+			if (v1->isActive && v2->isActive && v4->isActive)
+			{
+				indices.push_back(idx * 4);
+				indices.push_back(idx * 4 + 3);
+				indices.push_back(idx * 4 + 1);
+			}
+			if (v1->isActive && v3->isActive && v4->isActive)
+			{
+				indices.push_back(idx * 4);
+				indices.push_back(idx * 4 + 2);
+				indices.push_back(idx * 4 + 3);
+			}
 
 			/*
 			m_SquareMesh.SetMesh(
@@ -296,6 +312,8 @@ void Cloth::DrawTexture(const Camera& camera, const Shader& shader)
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, indices.data());
 	m_ClothMesh.ebo.UnBind();
 	m_ClothMesh.vao.UnBind();
+
+	shader.SetBool("u_UseDiffuseColor", false);
 }
 
 
@@ -309,6 +327,9 @@ void Cloth::UpdateForce(const float& dt)
 		for (int col = 0; col < m_SamplerAmount; col++)
 		{
 			PointMass* currentPointMass = GetPointMass(row, col);
+			
+			if (!currentPointMass->isActive)
+				continue;
 
 			// Apply Gravitational Force
 			currentPointMass->force += m_EachMass * glm::vec3(0.0f, -g, 0.0f);
@@ -316,6 +337,9 @@ void Cloth::UpdateForce(const float& dt)
 			// Apply Spring Force
 			for (int pm_index = 0; pm_index < currentPointMass->neighborSize; pm_index++)
 			{
+				if (!currentPointMass->neighborList[pm_index].first->isActive)
+					continue;
+
 				glm::vec3 v = currentPointMass->neighborList[pm_index].first->position - currentPointMass->position;
 				if(currentPointMass->neighborList[pm_index].second == STRUCTURAL_X)
 					currentPointMass->force += glm::normalize(v) * (glm::length(v) - m_EachLength) * kx;
@@ -323,10 +347,12 @@ void Cloth::UpdateForce(const float& dt)
 					currentPointMass->force += glm::normalize(v) * (glm::length(v) - m_EachLength) * ky;
 				else if (currentPointMass->neighborList[pm_index].second == SHEAR)
 					currentPointMass->force += glm::normalize(v) * (glm::length(v) - m_EachLength * SQRT_2) * k;
+				/*
 				else if (currentPointMass->neighborList[pm_index].second == FLEXION_X)
 					currentPointMass->force += glm::normalize(v) * (glm::length(v) - m_EachLength * 2.0f) * kx;
 				else if (currentPointMass->neighborList[pm_index].second == FLEXION_Y)
 					currentPointMass->force += glm::normalize(v) * (glm::length(v) - m_EachLength * 2.0f) * ky;
+				*/
 			}
 
 			// Apply Wind Force
@@ -368,6 +394,10 @@ void Cloth::UpdateCollision(const float& dt, const Sphere& sphere, const Floor& 
 		for (int col = 0; col < m_SamplerAmount; col++)
 		{
 			PointMass* currentPointMass = GetPointMass(row, col);
+
+			if (!currentPointMass->isActive)
+				continue;
+
 			currentPointMass->UpdatePosition(dt);
 
 			if (sphere.IsActive())
