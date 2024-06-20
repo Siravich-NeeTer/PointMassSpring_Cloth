@@ -299,7 +299,7 @@ void Cloth::DrawTexture(const Camera& camera, const Shader& shader)
 }
 
 
-void Cloth::UpdateForce(const float& dt, const Sphere& sphere, const Floor& floor)
+void Cloth::UpdateForce(const float& dt)
 {
 	float k = sqrt(kx * kx + ky * ky);
 	m_Time += dt;
@@ -360,7 +360,9 @@ void Cloth::UpdateForce(const float& dt, const Sphere& sphere, const Floor& floo
 	if (m_PinPoint[1]) { GetPointMass(0, m_SamplerAmount - 1)->acceleration = glm::vec3(0.0f); }
 	if (m_PinPoint[2]) { GetPointMass(m_SamplerAmount - 1, 0)->acceleration = glm::vec3(0.0f); }
 	if (m_PinPoint[3]) { GetPointMass(0, 0)->acceleration = glm::vec3(0.0f); }
-	
+}
+void Cloth::UpdateCollision(const float& dt, const Sphere& sphere, const Floor& floor)
+{
 	for (int row = 0; row < m_SamplerAmount; row++)
 	{
 		for (int col = 0; col < m_SamplerAmount; col++)
@@ -401,14 +403,14 @@ void Cloth::UpdateForce(const float& dt, const Sphere& sphere, const Floor& floo
 	// Check Before Hit the Floor
 	BuildSpatialMap();
 	const float thickness = 0.005f;
-	for (int i = 0; i < m_SamplerAmount * m_SamplerAmount; i++) 
+	for (int i = 0; i < m_SamplerAmount * m_SamplerAmount; i++)
 	{
 		PointMass* pm1 = m_PointMass[i];
 		std::vector<PointMass*>& nearby_pms = m_SpatialMap[HashPosition(pm1->position)];
-		for (int j = 0; j < nearby_pms.size(); j++) 
-		{	
+		for (int j = 0; j < nearby_pms.size(); j++)
+		{
 			PointMass* pm2 = nearby_pms[j];
-			if (pm1 != pm2) 
+			if (pm1 != pm2)
 			{
 				float dist = glm::length(pm1->position - pm2->position);
 				if (dist < 2 * thickness)
@@ -416,7 +418,7 @@ void Cloth::UpdateForce(const float& dt, const Sphere& sphere, const Floor& floo
 					glm::vec3 correction = glm::normalize(pm1->position - pm2->position) * (2 * thickness - dist) * 5.0f;
 					std::cout << "COLLIDE\n";
 					//std::cout << correction.x << " " << correction.y << " " << correction.z << "\n";
-					
+
 					pm1->acceleration = glm::vec3(0.0f);
 					pm1->velocity = glm::vec3(0.0f);
 					pm1->position += correction;
@@ -700,7 +702,7 @@ void Cloth::UpdateBVH()
 	Config.quality = bvh::v2::DefaultBuilder<Node>::Quality::High;
 	bvh = bvh::v2::DefaultBuilder<Node>::build(thread_pool, BoxesList, CenterList, Config);
 }
-void Cloth::UpdateRaycast(const glm::vec3& rayOrg, const glm::vec3& rayDir)
+void Cloth::UpdateRaycast(const glm::vec3& rayOrg, const glm::vec3& rayDir, float &t, PointMass* &hitPointMass)
 {
 	Ray ray = Ray
 	{
@@ -736,6 +738,11 @@ void Cloth::UpdateRaycast(const glm::vec3& rayOrg, const glm::vec3& rayDir)
 	if(prim_id != invalid_id)
 		m_PointMass[prim_id]->position.y += 0.1f;
 	*/
+	t = ray.tmax;
+	if (prim_id != invalid_id)
+		hitPointMass = m_PointMass[prim_id];
+	else
+		hitPointMass = nullptr;
 }
 bool Cloth::RayAABB(Ray& ray, const BBox& aabb)
 {

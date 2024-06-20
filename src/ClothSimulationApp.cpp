@@ -126,11 +126,25 @@ void ClothSimulationApp::Render()
 	{
 		cloth.UpdateBVH();
 		UpdateMousePicking(view, projection);
+		cloth.UpdateRaycast(ray.org, ray.dir, ray.t, hitPointMass);
 	}
 
 	// ------------------ Update Process ------------------
 	if (startSimulate)
-		cloth.UpdateForce(dt, sphere, floor);
+	{
+		cloth.UpdateForce(dt);
+		
+		if (hitPointMass && Input::isKeyPressed(GLFW_MOUSE_BUTTON_1) && !isCameraMove)
+		{
+			UpdateMousePicking(view, projection);
+
+			hitPointMass->position = ray.org + ray.dir * ray.t;
+			hitPointMass->acceleration = glm::vec3(0.0f);
+			hitPointMass->velocity = glm::vec3(0.0f);
+		}
+
+		cloth.UpdateCollision(dt, sphere, floor);
+	}
 
 	// ------------------ Render gBuffer ------------------
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
@@ -296,10 +310,9 @@ void ClothSimulationApp::UpdateMousePicking(const glm::mat4& view, const glm::ma
 	glm::vec4 rayEye = glm::inverse(proj) * rayClip;
 	rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f);
 
-	glm::vec3 rayOrg = camera.GetPosition();
-	glm::vec3 rayDir = glm::vec3(glm::inverse(view) * rayEye);
-	rayDir = glm::normalize(rayDir);
+	ray.org = camera.GetPosition();
+	ray.dir = glm::vec3(glm::inverse(view) * rayEye);
+	ray.dir = glm::normalize(ray.dir);
 
 	//std::cout << rayDir.x << ", " << rayDir.y << ", " << rayDir.z << "\n";
-	cloth.UpdateRaycast(rayOrg, rayDir);
 }

@@ -115,7 +115,8 @@ class Cloth : public Object
 
 		void DrawWireframe(const Shader& shader);
 		void DrawTexture(const Camera& camera, const Shader& shader);
-		void UpdateForce(const float& dt, const Sphere& sphere, const Floor& floor);
+		void UpdateForce(const float& dt);
+		void UpdateCollision(const float& dt, const Sphere& sphere, const Floor& floor);
 
 		int GetSamplerAmount() const;
 		float GetClothSize() const;
@@ -140,6 +141,6 @@ class Cloth : public Object
 		void GetFlexionYAxisNeighborPointMass(const int& row, const int& column, PointMass* pointMassList[], size_t& newSize) const;
 
 		void UpdateBVH();
-		void UpdateRaycast(const glm::vec3& rayOrg, const glm::vec3& rayDir);
+		void UpdateRaycast(const glm::vec3& rayOrg, const glm::vec3& rayDir, float &t, PointMass* &hitPointMass);
 		bool RayAABB(Ray& ray, const BBox& aabb);
 };

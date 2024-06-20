@@ -47,12 +47,13 @@ class ClothSimulationApp
 		Shader deferredShader;
 		Shader shaderLightBox;
 
-
 		// Rendering Objects
 		SkyBox skybox;
 		Cloth cloth;
 		Sphere sphere;
 		Floor floor;
+
+		PointMass* hitPointMass;
 
 		// Light Position
 		glm::vec3 lightPos[5] =
@@ -92,6 +93,14 @@ class ClothSimulationApp
 		// Time
 		float prevTime = 0.0f;
 		float dt = 0.0f;
+		// Ray Casting
+		struct Ray
+		{
+			glm::vec3 org;
+			glm::vec3 dir;
+			float t;
+		};
+		Ray ray;
 
 		void InitImGui();
 
