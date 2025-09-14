@@ -331,6 +331,8 @@ void Cloth::UpdateForce(const float& dt)
 			if (!currentPointMass->isActive)
 				continue;
 
+			currentPointMass->mass = m_EachMass;
+
 			// Apply Gravitational Force
 			currentPointMass->force += m_EachMass * glm::vec3(0.0f, -g, 0.0f);
 
@@ -375,17 +377,31 @@ void Cloth::UpdateForce(const float& dt)
 			currentPointMass->acceleration = m_EachMassInvert * currentPointMass->force * dt;
 			//std::cout << currentPointMass->acceleration.x << " " << currentPointMass->acceleration.y << " " << currentPointMass->acceleration.z << "\n";
 
-			currentPointMass->force = glm::vec3(0.0f);
-
 			// Set normal Vector to (0,0,0) -> will be compute when drawing
 			currentPointMass->normal = glm::vec3(0.0f);
 		}
 	}
 
-	if (m_PinPoint[0]) { GetPointMass(m_SamplerAmount - 1, m_SamplerAmount - 1)->acceleration = glm::vec3(0.0f); }
-	if (m_PinPoint[1]) { GetPointMass(0, m_SamplerAmount - 1)->acceleration = glm::vec3(0.0f); }
-	if (m_PinPoint[2]) { GetPointMass(m_SamplerAmount - 1, 0)->acceleration = glm::vec3(0.0f); }
-	if (m_PinPoint[3]) { GetPointMass(0, 0)->acceleration = glm::vec3(0.0f); }
+	if (m_PinPoint[0]) 
+	{ 
+		GetPointMass(m_SamplerAmount - 1, m_SamplerAmount - 1)->acceleration = glm::vec3(0.0f); 
+		GetPointMass(m_SamplerAmount - 1, m_SamplerAmount - 1)->force = glm::vec3(0.0f);
+	}
+	if (m_PinPoint[1]) 
+	{ 
+		GetPointMass(0, m_SamplerAmount - 1)->acceleration = glm::vec3(0.0f);
+		GetPointMass(0, m_SamplerAmount - 1)->force = glm::vec3(0.0f);
+	}
+	if (m_PinPoint[2]) 
+	{ 
+		GetPointMass(m_SamplerAmount - 1, 0)->acceleration = glm::vec3(0.0f);
+		GetPointMass(m_SamplerAmount - 1, 0)->force = glm::vec3(0.0f);
+	}
+	if (m_PinPoint[3]) 
+	{ 
+		GetPointMass(0, 0)->acceleration = glm::vec3(0.0f);
+		GetPointMass(0, 0)->force = glm::vec3(0.0f);
+	}
 }
 void Cloth::UpdateCollision(const float& dt, const Sphere& sphere, const Floor& floor)
 {
@@ -399,6 +415,7 @@ void Cloth::UpdateCollision(const float& dt, const Sphere& sphere, const Floor& 
 				continue;
 
 			currentPointMass->UpdatePosition(dt);
+			currentPointMass->force = glm::vec3(0.0f);
 
 			if (sphere.IsActive())
 			{
