@@ -1,23 +1,23 @@
 #include "Constant.h"
 
 // Point Mass Component
-int samplerAmount = 70;	// Generate PointMass[N][N]
+int samplerAmount = 30;	// Generate PointMass[N][N]
 float length = 5.0f;
 
 // Constant Value
 float PI = 3.141592f;
 float g = 9.81f;
-float kx = 0.9206f;
-float ky = 0.44936f;
-float m = 0.1572f;
-float TimeStep = 1.0f / 10.0f;
+float kx = 1.5f;
+float ky = 1.5f;
+float m = 1.0f;
+float TimeStep = 1.0f / 60.0f;
 
 void ResetConstant()
 {
 	PI = 3.141592f;
 	g = 9.81f;
-	kx = 0.9206f;
-	ky = 0.44936f;
-	m = 0.1572f;
-	TimeStep = 1.0f / 10.0f;
+	kx = 1.5f;
+	ky = 1.5f;
+	m = 1.0f;
+	TimeStep = 1.0f / 60.0f;
 }

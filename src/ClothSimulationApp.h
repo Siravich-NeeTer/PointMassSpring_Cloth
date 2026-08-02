@@ -95,6 +95,7 @@ class ClothSimulationApp
 		int selectedRenderTypeIndex = 0;
 		bool isHideLight = true;
 		// Time
+		float fixedDeltaTimeCounter = 0.0f;
 		float prevTime = 0.0f;
 		float dt = 0.0f;
 		// Ray Casting
@@ -279,7 +280,7 @@ class ClothSimulationApp
 
 			ImGui::Text("Render Type");
 			ImGui::SameLine();
-			if (ImGui::BeginCombo("", selectedRenderType))
+			if (ImGui::BeginCombo("##", selectedRenderType))
 			{
 				for (int n = 0; n < IM_ARRAYSIZE(renderType); n++)
 				{

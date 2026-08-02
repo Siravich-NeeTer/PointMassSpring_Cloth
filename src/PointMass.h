@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <utility>
 #include <glm/glm.hpp>
 
@@ -21,6 +22,7 @@ class PointMass
 		glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 		glm::vec3 acceleration = glm::vec3(0.0f, 0.0f, 0.0f);
 		glm::vec3 force = glm::vec3(0.0f, 0.0f, 0.0f);
+		float mass = 0.0f;
 
 		bool isActive = true;
 

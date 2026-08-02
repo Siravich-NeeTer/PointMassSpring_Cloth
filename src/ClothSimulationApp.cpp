@@ -74,8 +74,8 @@ void ClothSimulationApp::Run()
 void ClothSimulationApp::Render()
 {
 	float currentTime = glfwGetTime();
-	//dt = currentTime - prevTime;
-	dt = TimeStep;
+	dt = currentTime - prevTime;
+	fixedDeltaTimeCounter += dt;
 	window.PollEvents();
 
 	fpsCounter.Update(currentTime - prevTime);
@@ -137,29 +137,34 @@ void ClothSimulationApp::Render()
 	// ------------------ Update Process ------------------
 	if (startSimulate)
 	{
-		const int step = 15;
-		for (int i = 0; i < step; i++)
+		if (fixedDeltaTimeCounter >= TimeStep)
 		{
-			cloth.UpdateForce(dt / step);
+			const int step = 15;
+			for (int i = 0; i < step; i++)
+			{
+				cloth.UpdateForce(TimeStep / step);
 		
-			if (hitPointMass && Input::isKeyPressed(GLFW_MOUSE_BUTTON_1) && !isCameraMove)
-			{
-				UpdateMousePicking(view, projection);
+				if (hitPointMass && Input::isKeyPressed(GLFW_MOUSE_BUTTON_1) && !isCameraMove)
+				{
+					UpdateMousePicking(view, projection);
 
-				hitPointMass->position = ray.org + ray.dir * ray.t;
-				hitPointMass->acceleration = glm::vec3(0.0f);
-				hitPointMass->velocity = glm::vec3(0.0f);
+					hitPointMass->position = ray.org + ray.dir * ray.t;
+					hitPointMass->force = glm::vec3(0.0f);
+					hitPointMass->acceleration = glm::vec3(0.0f);
+					hitPointMass->velocity = glm::vec3(0.0f);
+				}
+				else if (Input::isKeyPressed(GLFW_MOUSE_BUTTON_2) && !isCameraMove)
+				{
+					UpdateMousePicking(view, projection);
+					cloth.UpdateRaycast(ray.org, ray.dir, ray.t, hitPointMass);
+
+					if(hitPointMass)
+						hitPointMass->isActive = false;
+				}
+
+				cloth.UpdateCollision(TimeStep / step, sphere, floor);
 			}
-			else if (Input::isKeyPressed(GLFW_MOUSE_BUTTON_2) && !isCameraMove)
-			{
-				UpdateMousePicking(view, projection);
-				cloth.UpdateRaycast(ray.org, ray.dir, ray.t, hitPointMass);
-
-				if(hitPointMass)
-					hitPointMass->isActive = false;
-			}
-
-			cloth.UpdateCollision(dt / step, sphere, floor);
+			fixedDeltaTimeCounter = 0.0f;
 		}
 	}
 
