@@ -88,6 +88,7 @@ class ClothSimulationApp
 		// UI Information
 		bool startSimulate = false;
 		bool isCameraMove = false;
+		bool isCutMode = false;
 		bool drawType = false;
 		bool isRenderSphere = true;
 		const char* renderType[4] = { "Deferred", "Diffuse", "Position", "Normal"};
@@ -213,17 +214,22 @@ class ClothSimulationApp
 			ImGui::Begin("Cloth Simulation");
 
 			ImGui::Text("Input Instruction:");
-			ImGui::Text("W/A/S/D : Moving Camera");
-			ImGui::Text("Left ALT : Toggle Cursor Mode");
+			ImGui::Text("Hold Right Mouse + W/A/S/D/Q/E : Move Camera");
+			ImGui::Text("Hold Right Mouse + Move Mouse : Rotate Camera");
 			ImGui::Text("1 : Cloth Wireframe Mode");
 			ImGui::Text("2 : Toggle Render Mode");
-			if (isCameraMove)
-				ImGui::Text("Move Mouse : Rotate Camera");
+			ImGui::Text("TAB : Toggle Pickup/Cut Mode");
 			if (startSimulate)
-			{
-				ImGui::Text("Left Click : Pickup/Drag Cloth");
-				ImGui::Text("Right Click : Cutting Cloth");
-			}
+				ImGui::Text("Left Click : %s Cloth", isCutMode ? "Cut" : "Pickup/Drag");
+			ImGui::NewLine();
+
+			ImGui::Text("Mouse Mode :");
+			ImGui::SameLine();
+			if (ImGui::RadioButton("Pickup", !isCutMode))
+				isCutMode = false;
+			ImGui::SameLine();
+			if (ImGui::RadioButton("Cut", isCutMode))
+				isCutMode = true;
 			ImGui::NewLine();
 
 			if (ImGui::CollapsingHeader("Cloth"))

@@ -97,9 +97,23 @@ void ClothSimulationApp::Render()
 	if (Input::isKeyPressed(GLFW_KEY_V))
 		sphere.IncreaseY(dt);
 
+	if (Input::isKeyBeginPressed(GLFW_MOUSE_BUTTON_2) && !ImGui::GetIO().WantCaptureMouse)
+	{
+		camera.ResetMousePosition();
+		isCameraMove = true;
+		glfwSetInputMode(window.GetWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
+	if (Input::isKeyEndPressed(GLFW_MOUSE_BUTTON_2))
+	{
+		isCameraMove = false;
+		glfwSetInputMode(window.GetWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+
 	if (isCameraMove)
+	{
 		camera.ProcessMousesMovement();
-	camera.Input(currentTime - prevTime);
+		camera.Input(dt);
+	}
 
 	if (Input::isKeyBeginPressed(GLFW_KEY_SPACE))
 		startSimulate = true;
@@ -110,16 +124,8 @@ void ClothSimulationApp::Render()
 		selectedRenderTypeIndex = (selectedRenderTypeIndex + 1) % 4;
 		selectedRenderType = renderType[selectedRenderTypeIndex];
 	}
-	if (Input::isKeyBeginPressed(GLFW_KEY_LEFT_ALT))
-	{
-		camera.ResetMousePosition();
-		isCameraMove = !isCameraMove;
-		if (isCameraMove)
-			glfwSetInputMode(window.GetWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		else
-			glfwSetInputMode(window.GetWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	}
-
+	if (Input::isKeyBeginPressed(GLFW_KEY_TAB))
+		isCutMode = !isCutMode;
 
 	UpdateUIMenu(cloth, sphere, floor);
 
@@ -127,7 +133,7 @@ void ClothSimulationApp::Render()
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), window.GetWidth() / window.GetHeight(), 0.1f, 100.0f);
 
 
-	if ((Input::isKeyBeginPressed(GLFW_MOUSE_BUTTON_1) || Input::isKeyBeginPressed(GLFW_MOUSE_BUTTON_2)) && !isCameraMove)
+	if (Input::isKeyBeginPressed(GLFW_MOUSE_BUTTON_1) && !isCameraMove)
 	{
 		cloth.UpdateBVH();
 		UpdateMousePicking(view, projection);
@@ -144,22 +150,25 @@ void ClothSimulationApp::Render()
 			{
 				cloth.UpdateForce(TimeStep / step);
 		
-				if (hitPointMass && Input::isKeyPressed(GLFW_MOUSE_BUTTON_1) && !isCameraMove)
+				if (Input::isKeyPressed(GLFW_MOUSE_BUTTON_1) && !isCameraMove)
 				{
-					UpdateMousePicking(view, projection);
+					if (isCutMode)
+					{
+						UpdateMousePicking(view, projection);
+						cloth.UpdateRaycast(ray.org, ray.dir, ray.t, hitPointMass);
 
-					hitPointMass->position = ray.org + ray.dir * ray.t;
-					hitPointMass->force = glm::vec3(0.0f);
-					hitPointMass->acceleration = glm::vec3(0.0f);
-					hitPointMass->velocity = glm::vec3(0.0f);
-				}
-				else if (Input::isKeyPressed(GLFW_MOUSE_BUTTON_2) && !isCameraMove)
-				{
-					UpdateMousePicking(view, projection);
-					cloth.UpdateRaycast(ray.org, ray.dir, ray.t, hitPointMass);
+						if (hitPointMass)
+							hitPointMass->isActive = false;
+					}
+					else if (hitPointMass)
+					{
+						UpdateMousePicking(view, projection);
 
-					if(hitPointMass)
-						hitPointMass->isActive = false;
+						hitPointMass->position = ray.org + ray.dir * ray.t;
+						hitPointMass->force = glm::vec3(0.0f);
+						hitPointMass->acceleration = glm::vec3(0.0f);
+						hitPointMass->velocity = glm::vec3(0.0f);
+					}
 				}
 
 				cloth.UpdateCollision(TimeStep / step, sphere, floor);
